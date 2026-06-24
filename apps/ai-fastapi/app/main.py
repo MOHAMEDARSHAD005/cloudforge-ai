@@ -1,9 +1,8 @@
 from fastapi import FastAPI, Body
 from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
 from datetime import datetime
 import structlog
-from app.core.logging import setup_logging
+from app.core.logger import setup_logging
 from app.core.middleware import TraceIdMiddleware
 
 setup_logging()

@@ -19,8 +19,8 @@ export class LoggingInterceptor implements NestInterceptor {
         const durationMs = Date.now() - startTime;
         const statusCode = response.statusCode;
         
-        // Log in the expected structured JSON format
-        this.logger.log(`HTTP ${method} ${url} - ${statusCode}`, {
+        // Log in the expected structured JSON format with a static log message to prevent log injection
+        this.logger.log('HTTP request processed', {
           method,
           path: url,
           statusCode,
