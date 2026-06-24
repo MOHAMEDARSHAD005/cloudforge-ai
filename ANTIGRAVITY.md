@@ -12,19 +12,21 @@ Read:
 
 Then read:
 
-1. project-context.md
-2. PLAN.md
-3. decisions.md
-4. open-questions.md
-5. AGENTS.md
-6. SEQUENCE.md
-7. FAILURE_MATRIX.md
-8. OBSERVABILITY.md
-9. RUNBOOKS.md
-10. TESTING_STRATEGY.md
-11. PROMPT_VERSIONING.md
-12. DESIGN.md
-13. DOCS_MAINTENANCE_AGENT.md
+Then read:
+
+1. docs/project-context.md
+2. docs/PLAN.md
+3. docs/decisions.md
+4. docs/open-questions.md
+5. docs/AGENTS.md
+6. docs/SEQUENCE.md
+7. docs/FAILURE_MATRIX.md
+8. docs/OBSERVABILITY.md
+9. docs/RUNBOOKS.md
+10. docs/TESTING_STRATEGY.md
+11. docs/PROMPT_VERSIONING.md
+12. docs/DESIGN.md
+13. docs/DOCS_MAINTENANCE_AGENT.md
 
 Always begin with:
 
