@@ -25,6 +25,7 @@
 | ADR-014 | Structured JSON logging with traceId propagation | ✅ Accepted | June 2026 |
 | ADR-015 | Idempotent artifact generation | ✅ Accepted | June 2026 |
 | ADR-016 | Organization-level Git/GitHub workflow | ✅ Accepted | June 2026 |
+| ADR-017 | Squash Merge Strategy | ✅ Accepted | June 2026 |
 
 ---
 
@@ -1200,18 +1201,38 @@ Rejected because:
 
 #### Single Merge Strategy
 
-Not decided.
+Resolved.
 
-Tracked by:
+See:
 
 ```text
-OQ-017
+ADR-017
 ```
 
-Possible options:
+---
 
-* Squash merge
-* Merge commit
-* Rebase merge
+## ADR-017: Squash Merge Strategy
 
-Decision deferred until Phase 0 completion.
+**Status:** ✅ Accepted  
+**Date:** June 2026
+
+### Context
+All changes flow through Pull Requests. The merge strategy impacts commit history readability, revert difficulty, release automation, and changelog generation.
+
+### Decision
+Use **Squash Merge** as the default merge strategy for all pull requests to `main`.
+
+### Consequences
+* ✅ Keeps git history on `main` clean and linear — one PR equals one commit.
+* ✅ Reverting a feature is simple: just revert a single commit.
+* ✅ Simplifies automated changelog generation and release creation.
+* ⚠️ Intermediate commits on feature branches are lost (this is acceptable as it prevents branch pollution and minor commit noise).
+
+### Alternatives Rejected
+
+#### Merge Commit
+Keeps intermediate commits but makes history noisy and difficult to trace.
+
+#### Rebase Merge
+Keeps linear history but rewrites hashes and makes trace mapping harder.
+

@@ -330,7 +330,8 @@ Currently the UI shows agent outputs only after each agent is fully complete (Py
 
 ### OQ-017: Which merge strategy should be used?
 
-**Status:** `[ ]` Open`
+**Status:** `[✅]` Resolved  
+**Resolution:** Squash Merge selected as standard. See ADR-017.
 
 **Phase:** Must resolve before Phase 0 exit
 
@@ -369,6 +370,7 @@ Owner: Engineering Lead
 | OQ | Question | Resolution | ADR |
 |---|---|---|---|
 | OQ-009 | How to version artifact outputs? | schema_version + prompt_version in every artifact | ADR-011, ADR-012 |
+| OQ-017 | Which merge strategy should be used? | Squash Merge | ADR-017 |
 | — | Should we use a monorepo? | Yes, Turborepo | ADR-001 |
 | — | Which agent framework? | Pydantic AI | ADR-002 |
 | — | Sync vs async jobs? | Async (BullMQ) | ADR-003 |

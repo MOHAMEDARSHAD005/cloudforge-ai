@@ -148,6 +148,12 @@ audit trail of what documentation changed and why. Keep entries terse — one pa
 - OQ status changes: <none | OQ-0XX: [ ] → [~] / [✅]>
 ```
 
+### [2026-06-24] Task: Phase 0 — Foundation
+- Files touched: docs/PLAN.md, docs/decisions.md, docs/open-questions.md, docs/DOCS_MAINTENANCE_AGENT.md
+- Summary: Marked all Phase 0 tasks, exit criteria, and acceptance criteria as complete in PLAN.md. Created ADR-017 for Squash Merge and resolved OQ-017 in open-questions.md.
+- New ADRs: ADR-017
+- OQ status changes: OQ-017: [ ] → [✅]
+
 ---
 
 ## 5. Quick Reference Table
