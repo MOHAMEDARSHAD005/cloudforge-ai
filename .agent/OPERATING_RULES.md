@@ -21,3 +21,8 @@ Always produce:
 5. Validation Checklist
 
 before writing code.
+
+Never interpolate user input/URLs into log messages (prevent log injection). Use static messages with structured metadata.
+Never create local Python modules named after Python standard library modules (e.g. logging, sys, json, asyncio).
+Always remove unused imports before final validation.
+
