@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: cloudforge-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: cloudforge
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: cloudforge-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api-nest:
+    build:
+      context: ..
+      dockerfile: apps/api-nest/Dockerfile
+    container_name: cloudforge-api-nest
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/cloudforge?schema=public
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ../apps/api-nest:/usr/src/app/apps/api-nest
+      - ../packages:/usr/src/app/packages
+
+  ai-fastapi:
+    build:
+      context: ..
+      dockerfile: apps/ai-fastapi/Dockerfile
+    container_name: cloudforge-ai-fastapi
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+    volumes:
+      - ../apps/ai-fastapi:/app
+      - ../packages:/app/packages
+
+  frontend-next:
+    build:
+      context: ..
+      dockerfile: apps/frontend-next/Dockerfile
+    container_name: cloudforge-frontend-next
+    ports:
+      - "3001:3001"
+    depends_on:
+      - api-nest
+    volumes:
+      - ../apps/frontend-next:/usr/src/app/apps/frontend-next
+      - ../packages:/usr/src/app/packages
+
+volumes:
+  pgdata:
+  redisdata:

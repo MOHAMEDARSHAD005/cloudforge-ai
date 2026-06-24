@@ -5,11 +5,25 @@ coverage/
 
 .env
 .env.*
+!.env.example
 
+# Python
 __pycache__/
 .pytest_cache/
 .venv/
 venv/
+*.pyc
 
+# Logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Turborepo
+.turbo/
+
+# System files
 .DS_Store
+Thumbs.db
+*.tsbuildinfo

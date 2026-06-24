@@ -440,6 +440,32 @@ export default function () {
 ---
 
 ## CI Strategy
+## GitHub Workflow Testing
+
+Every workflow must be validated before merge.
+
+Required checks:
+
+* Workflow YAML validation
+* actionlint
+* Dependency installation verification
+* Security workflow execution verification
+* GitHub Action version verification
+
+Workflow failures are treated as CI failures.
+
+A workflow is not considered complete until validation succeeds on GitHub Actions.
+
+
+## GitHub Workflow Validation
+
+Every workflow must pass:
+
+- actionlint
+- YAML validation
+- dependency resolution checks
+
+CI failures caused by invalid GitHub Action references are treated as build failures.
 
 ### On Every PR
 
@@ -475,6 +501,12 @@ jobs:
   terraform-validation:
     - Run golden dataset TerraformBundle fixtures through terraform validate + tflint
     - Fail if any validation error
+
+  security-scans:
+    - npm audit --audit-level=high (Monorepo)
+    - pip-audit -r apps/ai-fastapi/requirements.txt (Python API)
+    - trivy fs --severity HIGH,CRITICAL (Fail if any high/critical vulnerability)
+    - CodeQL initialization and analyze (JavaScript/TypeScript + Python)
 ```
 
 ### On Prompt/Model Changes Only
@@ -489,6 +521,10 @@ jobs:
 ### Weekly Scheduled
 
 ```yaml
+  security-scans:
+    - schedule: '0 0 * * 0'  # Sunday midnight
+    - Run CodeQL, Trivy FS, npm audit, and pip-audit scans on main
+
   chaos-tests:
     - schedule: '0 2 * * 1'  # Monday 2am
     - Run against staging

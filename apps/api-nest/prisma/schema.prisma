@@ -1,0 +1,76 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  projects     Project[]
+}
+
+model Project {
+  id        String     @id @default(cuid())
+  userId    String
+  prompt    String
+  status    String     // PENDING | RUNNING | COMPLETE | FAILED | PARTIAL
+  createdAt DateTime   @default(now())
+  user      User       @relation(fields: [userId], references: [id])
+  jobs      Job[]
+  artifacts Artifact[]
+}
+
+model Job {
+  id           String       @id @default(cuid())
+  projectId    String
+  status       String       // PENDING | RUNNING | COMPLETE | FAILED | PARTIAL
+  startedAt    DateTime?
+  completedAt  DateTime?
+  errorMessage String?
+  traceId      String
+  project      Project      @relation(fields: [projectId], references: [id])
+  events       JobEvent[]
+  tokenUsages  TokenUsage[]
+}
+
+model JobEvent {
+  id        String   @id @default(cuid())
+  jobId     String
+  agent     String?  // null for job-level events
+  event     String   // "job:started" | "agent:started" | "agent:complete" | "agent:failed" | "job:complete" | "job:failed"
+  payload   Json
+  timestamp DateTime @default(now())
+  job       Job      @relation(fields: [jobId], references: [id])
+}
+
+model Artifact {
+  id            String   @id @default(cuid())
+  projectId     String
+  type          String   // PLAN | ARCHITECTURE | AWS_ARCHITECTURE | SECURITY | COST | TERRAFORM | DIAGRAM | REVIEW
+  payload       Json     // Validated Pydantic model serialized to JSON
+  schemaVersion String
+  promptVersion String
+  modelName     String
+  providerName  String
+  createdAt     DateTime @default(now())
+  shareToken    String?  @unique
+  project       Project  @relation(fields: [projectId], references: [id])
+}
+
+model TokenUsage {
+  id           String   @id @default(cuid())
+  jobId        String
+  agent        String
+  modelName    String
+  inputTokens  Int
+  outputTokens Int
+  costUsd      Float?
+  timestamp    DateTime @default(now())
+  job          Job      @relation(fields: [jobId], references: [id])
+}
