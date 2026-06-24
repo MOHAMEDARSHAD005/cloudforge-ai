@@ -81,3 +81,35 @@ Upgrading from Next.js 14 to Next.js 16 requires a React 19 upgrade. This is def
 
 ### Remediation Path
 Perform the complete upgrade of Next.js and React early in Phase 1.
+
+---
+
+## TECHDEBT-004: Starlette / FastAPI Security Advisories (Phase 0 Exception)
+
+* **Status:** ⚠️ Active (Accepted Risk)
+* **Date Identified:** June 2026
+* **Target Remediation Phase:** Phase 1 (Core Agent Pipeline)
+
+### Vulnerabilities Tracked
+
+| CVE / Advisory ID | Severity | Component | Description |
+| :--- | :--- | :--- | :--- |
+| **CVE-2024-47874** | High | `starlette@0.37.2` | DoS in MultiPartParser via memory buffering of form parts without size limits |
+| **CVE-2025-54121** | High | `starlette@0.37.2` | DoS via thread blocking during large multipart form file spooling |
+| **CVE-2026-48818** | High | `starlette@0.37.2` | NTLM credential theft / SSRF on Windows via UNC path parsing in StaticFiles |
+| **CVE-2026-48817** | Medium | `starlette@0.37.2` | Unintended method execution in HTTPEndpoint if methods argument is omitted |
+| **CVE-2026-54283** | High | `starlette@0.37.2` | DoS via memory/CPU exhaustion when parsing massive counts of x-www-form-urlencoded fields |
+| **CVE-2026-54282** | High | `starlette@0.37.2` | URL hostname parsing bypass leading to host validation bypasses if a request path lacks a leading / |
+| **CVE-2026-48710** | Medium | `starlette@0.37.2` | Host header validation bypass (BadHost) |
+
+### Business Justification for Deferring
+Upgrading Starlette to secure versions requires upgrading FastAPI from `0.111.0` to `0.138.0` (a jump of 27 minor releases). This is a major framework upgrade and conflicts with Phase 0 baseline stability requirements.
+
+None of the vulnerabilities are exploitable in the current codebase because:
+- The backend does not use multipart form parsing or `x-www-form-urlencoded` fields.
+- The application does not use Starlette's `StaticFiles` and runs in Linux Docker containers, not Windows.
+- The application uses FastAPI router decorators and does not inherit from Starlette's `HTTPEndpoint` class.
+- The service acts as an internal API service and does not perform hostname-based routing or access decisions.
+
+### Remediation Path
+Upgrade FastAPI to `>=0.138.0` (which pulls in Starlette `>=1.3.1`) early in Phase 1 as part of the backend dependency modernization task.

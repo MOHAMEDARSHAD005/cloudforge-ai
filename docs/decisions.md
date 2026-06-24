@@ -1347,7 +1347,8 @@ Remediating these vulnerabilities requires upgrading to Next.js 15+ (dependent o
    - `TECHDEBT-001`: Next.js 14 and PostCSS security advisories.
    - `TECHDEBT-002`: NestJS 10 to NestJS 11 migration path.
    - `TECHDEBT-003`: Next.js 14 to Next.js 16 migration path.
-4. **Remediation Target**: Plan and schedule the migration to Next.js 16/React 19 and NestJS 11 early in Phase 1 as separate, dedicated technical tasks.
+   - `TECHDEBT-004`: Starlette / FastAPI security advisories.
+4. **Remediation Target**: Plan and schedule the migration to Next.js 16/React 19, NestJS 11, and FastAPI 0.138+ (with Starlette 1.3+) early in Phase 1 as separate, dedicated technical tasks.
 
 ### Consequences
 * ✅ CI pipeline builds cleanly for active features and branches, unblocking progress.
