@@ -28,7 +28,7 @@
 | ADR-017 | Squash Merge Strategy | ✅ Accepted | June 2026 |
 | ADR-018 | Repository Security Scanning & Vulnerability Audits | ✅ Accepted | June 2026 |
 | ADR-019 | GitHub Actions Version Pinning Strategy | ✅ Accepted | June 2026 |
-| ADR-020 | Phase 0 Security Vulnerability Exception Policy | ✅ Accepted | June 2026 |
+| ADR-020 | Phase 0 Security Gate Policy | ✅ Accepted | June 2026 |
 
 ---
 
@@ -1323,35 +1323,44 @@ Prefer official stable releases over generated SHAs.
 
 ---
 
-## ADR-020: Phase 0 Security Vulnerability Exception Policy
+## ADR-020: Phase 0 Security Gate Policy
 
 **Status:** ✅ Accepted  
 **Date:** June 2026
 
 ### Context
-During Phase 0 (Foundation) security scans, Trivy and npm audit reported high-severity vulnerabilities in Next.js 14 and its sub-dependency PostCSS. Security patches for these issues are only available in Next.js 15+ and React 19+. 
+During Phase 0 (Foundation) security scans, Trivy and npm audit reported high-severity vulnerabilities in key framework dependencies:
+1. **Next.js 14** (and transitive dependencies like `postcss`).
+2. **NestJS 10** (and transitive dependencies like `glob`, `picomatch`, `tmp`, `webpack`).
 
-Upgrading the frontend application to Next.js 15+ or React 19+ in Phase 0 violates core requirements to maintain stable framework baselines and avoid major refactoring/breaking changes. We need a clear exception policy to track these vulnerabilities as accepted risks during Phase 0 without blocking the CI build.
+Remediating these vulnerabilities requires upgrading to Next.js 15+ (dependent on React 19+) and NestJS 11+ respectively. Upgrading these major framework versions during Phase 0 conflicts with the scope requirement of maintaining stable framework baselines and avoiding breaking architectural refactoring. However, we cannot let these high-severity findings break the CI pipeline and block active development. We need a security gating policy that provides complete visibility of vulnerabilities while allowing CI to build cleanly in the presence of these accepted framework risks.
 
 ### Decision
-1. **Accept Phase 0 Risk**: Defer the Next.js 14 and PostCSS vulnerabilities to Phase 1, accepting them as temporary non-exploitable risks.
-2. **Establish Technical Debt Tracking**: Log the deferred vulnerabilities in a central technical debt document (`docs/TECHDEBT.md`) as `TECHDEBT-001`.
-3. **Adjust CI Scanning Gate**: Update `.github/workflows/security.yml` to split the Trivy scans so that HIGH severity findings (like Next.js 14) are reported in CI logs/reports but do not fail the build (`exit-code: 0`).
-4. **Enforce Critical Failures**: Ensure CRITICAL severity checks still enforce a strict failure gate (`exit-code: 1`) to block new critical issues.
-5. **Remediation Target**: Plan and schedule a full migration to Next.js 16 and React 19 as a primary task early in Phase 1.
+1. **Differentiate Gate Thresholds by Severity**:
+   - **Fail CI on CRITICAL findings**: Any new or existing CRITICAL severity vulnerabilities must trigger build/workflow failures (exit code 1).
+   - **Report but Do Not Block on HIGH findings**: All HIGH, moderate, and low-severity vulnerabilities must still be audited, scanned, and fully reported in CI logs/reports for transparency, but will not fail the pipeline (exit code 0 or set as warning threshold).
+2. **Implement Gates in GitHub Workflows (`.github/workflows/security.yml`)**:
+   - **npm audit**: Run with `--audit-level=critical` to fail the build only when critical issues are found, while printing all audit warnings to the build logs.
+   - **Trivy File System Scanning**: Maintain a split configuration: one scanner targeting `CRITICAL` severity with `exit-code: 1` (blocking) and one scanner targeting `HIGH` severity with `exit-code: 0` (reporting only).
+   - **CodeQL Static Analysis**: Keep CodeQL scanning strictly blocking (`fail-on-severity` rules standard) for code-level security gates (e.g. injection, circular imports).
+3. **Track Deferred Risks as Technical Debt**: Log the deferred upgrades in `docs/TECHDEBT.md` under specific tracking IDs:
+   - `TECHDEBT-001`: Next.js 14 and PostCSS security advisories.
+   - `TECHDEBT-002`: NestJS 10 to NestJS 11 migration path.
+   - `TECHDEBT-003`: Next.js 14 to Next.js 16 migration path.
+4. **Remediation Target**: Plan and schedule the migration to Next.js 16/React 19 and NestJS 11 early in Phase 1 as separate, dedicated technical tasks.
 
 ### Consequences
-* ✅ CI pipeline builds cleanly for all branches, unblocking work.
-* ✅ Critical security issues are still blocked automatically.
-* ✅ Vulnerability exceptions are documented and tracked rather than hidden.
-* ⚠️ Staging/development operates with known Next.js 14 vulnerabilities (acceptable since the monorepo is not public-facing in Phase 0).
+* ✅ CI pipeline builds cleanly for active features and branches, unblocking progress.
+* ✅ Automated safeguards are still in place to block any new CRITICAL vulnerabilities.
+* ✅ Framework vulnerability exceptions are explicitly tracked as technical debt.
+* ⚠️ Active development/testing operates with known Next.js 14 and NestJS 10 vulnerabilities (acceptable since the monorepo is not deployed to public-facing production during Phase 0).
 
 ### Alternatives Rejected
 
-#### Forcing Next.js 16 Upgrade Immediately
-Rejected because React 19 peer dependency conflicts and major router/caching changes in Next.js 15/16 violate Phase 0 baseline stability requirements and require excessive code changes.
+#### Upgrading Next.js and NestJS immediately in Phase 0
+Rejected because the breaking changes in routers, caching models, and third-party dependencies would require significant refactoring, destabilizing the codebase during initial development.
 
-#### Disabling Security Scanning Completely
-Rejected because it exposes the project to unmonitored critical security issues and removes the audit trail.
+#### Disabling npm audit or Trivy scans
+Rejected because it would hide other security findings, losing audit transparency.
 
 ---

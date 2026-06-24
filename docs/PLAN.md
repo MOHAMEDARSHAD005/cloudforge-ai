@@ -134,7 +134,7 @@ The following are settled decisions — do not re-litigate without a new ADR:
 - [x] Secret scanning enabled
 - [x] Repository environments configured
 - [x] Release tags follow semantic versioning
-- [x] Next.js 14 and PostCSS vulnerabilities tracked as accepted risk (TECHDEBT-001)
+- [x] Next.js 14 / PostCSS and NestJS 10 / Tooling vulnerabilities tracked as accepted risk (TECHDEBT-001, TECHDEBT-002, TECHDEBT-003)
 - [x] All GitHub Actions workflows validated using actionlint
 - [x] All GitHub Actions references use official tags or verified SHAs
 - [x] npm/pnpm dependency graph resolves cleanly in CI

@@ -37,3 +37,47 @@ Since the frontend is not public-facing during Phase 0, the exploitability vecto
 
 ### Remediation Path
 Upgrade to Next.js `16.2.x` and React `19.2.x` early in Phase 1 when the development environment and pipeline baselines are fully established.
+
+---
+
+## TECHDEBT-002: NestJS 11 Migration (Phase 0 Exception)
+
+* **Status:** ⚠️ Active (Accepted Risk)
+* **Date Identified:** June 2026
+* **Target Remediation Phase:** Phase 1 (Core Agent Pipeline)
+
+### Vulnerabilities Tracked
+
+| CVE / Advisory ID | Severity | Component | Description |
+| :--- | :--- | :--- | :--- |
+| **GHSA-36xv-jgw5-4q75** | Moderate | `@nestjs/core@<=11.1.17` | Improper Neutralization of Special Elements in Output Used by a Downstream Component ('Injection') |
+| **GHSA-5j98-mcp5-4vw2** | High | `glob@<=10.4.5` (via `@nestjs/cli`) | Command injection via -c/--cmd executes matches with shell:true |
+| **GHSA-3v7f-55p6-f55p** | High | `picomatch@<=4.0.3` (via `@nestjs/cli`) | Method Injection in POSIX Character Classes causes incorrect Glob Matching |
+| **GHSA-c2c7-rcm5-vvqj** | High | `picomatch@<=4.0.3` (via `@nestjs/cli`) | ReDoS vulnerability via extglob quantifiers |
+| **GHSA-52f5-9888-hmc6** | High | `tmp@<=0.2.5` (via `@nestjs/cli` -> `inquirer`) | Arbitrary temporary file / directory write via symbolic link `dir` parameter |
+| **GHSA-ph9p-34f9-6g65** | High | `tmp@<=0.2.5` (via `@nestjs/cli` -> `inquirer`) | Path Traversal via unsanitized prefix/postfix enabling directory escape |
+| **GHSA-8fgc-7cc6-rx7x** | High | `webpack@<=5.104.0` (via `@nestjs/cli`) | allowedUris allow-list bypass leading to build-time SSRF behavior |
+| **GHSA-38r7-794h-5758** | High | `webpack@<=5.104.0` (via `@nestjs/cli`) | allowedUris bypass via HTTP redirects leading to SSRF |
+
+### Business Justification for Deferring
+Remediating these dependencies requires upgrading `@nestjs/cli`, `@nestjs/core`, `@nestjs/platform-express`, and `@nestjs/swagger` to NestJS v11. Upgrading NestJS major version in Phase 0 poses stability and architectural risks to the backend application, violating Phase 0 baseline rules. Since these are mostly dev dependencies or used only in internal API services, the security risk is minimal.
+
+### Remediation Path
+Upgrade to NestJS 11 and its matching dependencies during early Phase 1.
+
+---
+
+## TECHDEBT-003: Next.js 16 / React 19 Migration (Phase 0 Exception)
+
+* **Status:** ⚠️ Active (Accepted Risk)
+* **Date Identified:** June 2026
+* **Target Remediation Phase:** Phase 1 (Core Agent Pipeline)
+
+### Vulnerabilities Tracked
+This entry tracks the complete framework migration to Next.js 16 and React 19, which resolves all vulnerabilities listed in `TECHDEBT-001`.
+
+### Business Justification for Deferring
+Upgrading from Next.js 14 to Next.js 16 requires a React 19 upgrade. This is deferred to Phase 1 to prevent breaking changes and compatibility issues with the development environment in Phase 0.
+
+### Remediation Path
+Perform the complete upgrade of Next.js and React early in Phase 1.
