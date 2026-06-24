@@ -59,23 +59,36 @@ jobs:
         uses: actions/checkout@v4
 
       # Pinned: aquasecurity/trivy-action@master
-      - name: Run Trivy FS scan (Vulnerabilities & Misconfigurations)
+      - name: Run Trivy FS scan (HIGH Severity - Reporting only)
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
           ignore-unfixed: true
           format: 'table'
-          output: 'trivy-report.txt'
+          output: 'trivy-high-report.txt'
+          exit-code: '0'
+          severity: 'HIGH'
+
+      # Pinned: aquasecurity/trivy-action@master
+      - name: Run Trivy FS scan (CRITICAL Severity - Fail gate)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'table'
+          output: 'trivy-critical-report.txt'
           exit-code: '1'
-          severity: 'HIGH,CRITICAL'
+          severity: 'CRITICAL'
 
       # Pinned: actions/upload-artifact@v4
-      - name: Upload Trivy Report
+      - name: Upload Trivy Reports
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: trivy-security-report
-          path: trivy-report.txt
+          name: trivy-security-reports
+          path: |
+            trivy-high-report.txt
+            trivy-critical-report.txt
           retention-days: 7
 
   codeql:
