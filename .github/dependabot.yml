@@ -1,0 +1,53 @@
+# Dependabot Configuration
+# Ref: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+
+updates:
+  # 1. Maintain GitHub Actions dependencies
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      github-actions-dependencies:
+        patterns:
+          - "*"
+
+  # 2. Maintain npm dependencies at monorepo root (covers workspaces)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      npm-dependencies:
+        patterns:
+          - "*"
+
+  # 3. Maintain Python dependencies for FastAPI service
+  - package-ecosystem: "pip"
+    directory: "/apps/ai-fastapi"
+    schedule:
+      interval: "weekly"
+    groups:
+      pip-dependencies:
+        patterns:
+          - "*"
+
+  # 4. Maintain Docker base images for NestJS backend
+  - package-ecosystem: "docker"
+    directory: "/apps/api-nest"
+    schedule:
+      interval: "weekly"
+
+  # 5. Maintain Docker base images for FastAPI backend
+  - package-ecosystem: "docker"
+    directory: "/apps/ai-fastapi"
+    schedule:
+      interval: "weekly"
+
+  # 6. Maintain Docker base images for Next.js frontend
+  - package-ecosystem: "docker"
+    directory: "/apps/frontend-next"
+    schedule:
+      interval: "weekly"

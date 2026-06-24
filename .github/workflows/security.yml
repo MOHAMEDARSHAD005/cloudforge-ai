@@ -1,0 +1,98 @@
+name: Security Scanning
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 0 * * 0' # Weekly on Sundays at midnight
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  audit:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    steps:
+      # Pinned: actions/checkout@v4.2.2
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      # Pinned: actions/setup-node@v4.2.0
+      - name: Setup Node.js
+        uses: actions/setup-node@392252ceda07ee0a5b0751130940682a5c043214
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Run npm audit
+        run: |
+          npm audit --audit-level=high
+
+      # Pinned: actions/setup-python@v5.3.0
+      - name: Setup Python
+        uses: actions/setup-python@0b93645e9fae424249a4e572836ab5686002f231
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: 'apps/ai-fastapi/requirements.txt'
+
+      - name: Install pip-audit
+        run: |
+          python -m pip install --upgrade pip
+          pip install pip-audit
+
+      - name: Run pip-audit
+        run: |
+          pip-audit -r apps/ai-fastapi/requirements.txt
+
+  trivy:
+    name: Trivy Vulnerability Scan
+    runs-on: ubuntu-latest
+    steps:
+      # Pinned: actions/checkout@v4.2.2
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      # Pinned: aquasecurity/trivy-action@v0.28.0
+      - name: Run Trivy FS scan (Vulnerabilities & Misconfigurations)
+        uses: aquasecurity/trivy-action@18f28c3c73a0e5b722d56e6d19313a436ff11ff3
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'table'
+          output: 'trivy-report.txt'
+          exit-code: '1'
+          severity: 'HIGH,CRITICAL'
+
+      # Pinned: actions/upload-artifact@v4.5.0
+      - name: Upload Trivy Report
+        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b
+        if: always()
+        with:
+          name: trivy-security-report
+          path: trivy-report.txt
+          retention-days: 7
+
+  codeql:
+    name: CodeQL Static Analysis
+    runs-on: ubuntu-latest
+    steps:
+      # Pinned: actions/checkout@v4.2.2
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      # Pinned: github/codeql-action/init@v3.28.10
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@9e2933d0140d0289fc2058506dcc226bb7f2a8d1
+        with:
+          languages: javascript-typescript, python
+          queries: security-extended,security-and-quality
+
+      # Pinned: github/codeql-action/analyze@v3.28.10
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@9e2933d0140d0289fc2058506dcc226bb7f2a8d1
