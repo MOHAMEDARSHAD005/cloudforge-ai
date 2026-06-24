@@ -475,6 +475,12 @@ jobs:
   terraform-validation:
     - Run golden dataset TerraformBundle fixtures through terraform validate + tflint
     - Fail if any validation error
+
+  security-scans:
+    - npm audit --audit-level=high (Monorepo)
+    - pip-audit -r apps/ai-fastapi/requirements.txt (Python API)
+    - trivy fs --severity HIGH,CRITICAL (Fail if any high/critical vulnerability)
+    - CodeQL initialization and analyze (JavaScript/TypeScript + Python)
 ```
 
 ### On Prompt/Model Changes Only
@@ -489,6 +495,10 @@ jobs:
 ### Weekly Scheduled
 
 ```yaml
+  security-scans:
+    - schedule: '0 0 * * 0'  # Sunday midnight
+    - Run CodeQL, Trivy FS, npm audit, and pip-audit scans on main
+
   chaos-tests:
     - schedule: '0 2 * * 1'  # Monday 2am
     - Run against staging

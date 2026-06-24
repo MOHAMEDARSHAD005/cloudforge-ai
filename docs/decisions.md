@@ -26,6 +26,7 @@
 | ADR-015 | Idempotent artifact generation | ✅ Accepted | June 2026 |
 | ADR-016 | Organization-level Git/GitHub workflow | ✅ Accepted | June 2026 |
 | ADR-017 | Squash Merge Strategy | ✅ Accepted | June 2026 |
+| ADR-018 | Repository Security Scanning & Vulnerability Audits | ✅ Accepted | June 2026 |
 
 ---
 
@@ -1235,4 +1236,37 @@ Keeps intermediate commits but makes history noisy and difficult to trace.
 
 #### Rebase Merge
 Keeps linear history but rewrites hashes and makes trace mapping harder.
+
+---
+
+## ADR-018: Repository Security Scanning & Vulnerability Audits
+
+**Status:** ✅ Accepted  
+**Date:** June 2026
+
+### Context
+Dependency vulnerabilities, insecure file configurations, secrets/credentials exposure, and static code bugs can severely compromise the monorepo's integrity. To satisfy the repository security posture required in `PLAN.md` and `TESTING_STRATEGY.md`, we need automated, continuous security scanning and dependency audits.
+
+### Decision
+Implement and run a dedicated Security Scanning workflow (`.github/workflows/security.yml`) with:
+1. **Dependency Audits**: Run `npm audit --audit-level=high` (for Node monorepo workspaces) and `pip-audit` (for Python FastAPI requirements).
+2. **Container & Filesystem Scanning**: Run `Trivy` filesystem scans configured to report and fail (`exit-code: 1`) on any `HIGH,CRITICAL` vulnerabilities.
+3. **Static Application Security Testing (SAST)**: Integrate `CodeQL` analysis for `javascript-typescript` and `python` languages using `security-extended` and `security-and-quality` query suites.
+4. **Trigger Rules**: Run on every pull request targeting `main`, pushes to `main`, and on a weekly cron schedule (Sunday at midnight).
+5. **Workflow Permissions**: Define minimal permissions (`contents: read`, `security-events: write`, `actions: read`) to follow least-privilege security guidelines.
+6. **Action Pinning**: Pin all actions to specific commit SHAs rather than mutable tags to prevent supply-chain attacks.
+
+### Consequences
+* ✅ Automates vulnerability auditing, blocking insecure PRs from being merged.
+* ✅ Pinned action commit SHAs guarantee deterministic, secure CI workflow executions.
+* ✅ Weekly cron jobs scan the codebase even when no commits are made, catching newly disclosed CVEs.
+* ⚠️ Running full CodeQL static analysis and container scans increases the total CI execution time (acceptable trade-off for continuous security verification).
+
+### Alternatives Rejected
+
+#### Manual Vulnerability Auditing
+Rejected because manual audits are easily forgotten, cannot act as PR merge gates, and do not scale as the development team grows.
+
+#### Third-Party External Paid SaaS (e.g., Snyk)
+Rejected to minimize external integration dependencies, setup overhead, and software licensing costs, favoring GitHub native integrations (CodeQL, Dependabot) and robust open-source tools (Trivy).
 
