@@ -134,6 +134,14 @@ The following are settled decisions — do not re-litigate without a new ADR:
 - [x] Secret scanning enabled
 - [x] Repository environments configured
 - [x] Release tags follow semantic versioning
+- [ ] All GitHub Actions workflows validated using actionlint
+- [ ] All GitHub Actions references use official tags or verified SHAs
+- [ ] npm/pnpm dependency graph resolves cleanly in CI
+- [ ] actionlint passes for every workflow
+- [ ] Security workflows execute successfully on a clean branch
+- [ ] All referenced GitHub Actions versions resolve successfully
+- [ ] No dependency resolution failures in CI
+- [ ] GitHub workflow validation documented in  DOCS_MAINTENANCE_AGENT.md
 
 ---
 

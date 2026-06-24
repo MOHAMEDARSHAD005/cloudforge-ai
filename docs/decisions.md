@@ -1270,3 +1270,53 @@ Rejected because manual audits are easily forgotten, cannot act as PR merge gate
 #### Third-Party External Paid SaaS (e.g., Snyk)
 Rejected to minimize external integration dependencies, setup overhead, and software licensing costs, favoring GitHub native integrations (CodeQL, Dependabot) and robust open-source tools (Trivy).
 
+---
+
+## ADR-019: GitHub Actions Version Pinning Strategy
+
+**Status:** ✅ Accepted
+**Date:** June 2026
+
+### Context
+
+GitHub workflow failures occurred because generated workflow files referenced action SHAs that did not exist or could not be resolved.
+
+This created CI failures despite the workflow YAML being syntactically correct.
+
+### Decision
+
+Use official stable major versions for GitHub Actions:
+
+```text
+actions/checkout@v4
+actions/setup-node@v4
+actions/setup-python@v5
+github/codeql-action@v3
+aquasecurity/trivy-action@master
+```
+
+SHA pinning is only permitted when:
+
+* SHA validity has been verified
+* The SHA is documented
+* Security requirements mandate pinning
+
+Default policy:
+
+```text
+Prefer official stable releases over generated SHAs.
+```
+
+### Consequences
+
+* CI reliability improves
+* Fewer workflow failures caused by invalid action references
+* Easier maintenance
+
+### Alternatives Rejected
+
+* Arbitrary SHA pinning
+* Unverified generated action references
+* Floating latest versions
+
+---

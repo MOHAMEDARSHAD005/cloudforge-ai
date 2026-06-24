@@ -18,13 +18,13 @@ jobs:
     name: Dependency Audit
     runs-on: ubuntu-latest
     steps:
-      # Pinned: actions/checkout@v4.2.2
+      # Pinned: actions/checkout@v4
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@v4
 
-      # Pinned: actions/setup-node@v4.2.0
+      # Pinned: actions/setup-node@v4
       - name: Setup Node.js
-        uses: actions/setup-node@392252ceda07ee0a5b0751130940682a5c043214
+        uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: 'npm'
@@ -33,9 +33,9 @@ jobs:
         run: |
           npm audit --audit-level=high
 
-      # Pinned: actions/setup-python@v5.3.0
+      # Pinned: actions/setup-python@v5
       - name: Setup Python
-        uses: actions/setup-python@0b93645e9fae424249a4e572836ab5686002f231
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
@@ -54,13 +54,13 @@ jobs:
     name: Trivy Vulnerability Scan
     runs-on: ubuntu-latest
     steps:
-      # Pinned: actions/checkout@v4.2.2
+      # Pinned: actions/checkout@v4
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@v4
 
-      # Pinned: aquasecurity/trivy-action@v0.28.0
+      # Pinned: aquasecurity/trivy-action@master
       - name: Run Trivy FS scan (Vulnerabilities & Misconfigurations)
-        uses: aquasecurity/trivy-action@18f28c3c73a0e5b722d56e6d19313a436ff11ff3
+        uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
           ignore-unfixed: true
@@ -69,9 +69,9 @@ jobs:
           exit-code: '1'
           severity: 'HIGH,CRITICAL'
 
-      # Pinned: actions/upload-artifact@v4.5.0
+      # Pinned: actions/upload-artifact@v4
       - name: Upload Trivy Report
-        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: trivy-security-report
@@ -82,17 +82,17 @@ jobs:
     name: CodeQL Static Analysis
     runs-on: ubuntu-latest
     steps:
-      # Pinned: actions/checkout@v4.2.2
+      # Pinned: actions/checkout@v4
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@v4
 
-      # Pinned: github/codeql-action/init@v3.28.10
+      # Pinned: github/codeql-action/init@v3
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@9e2933d0140d0289fc2058506dcc226bb7f2a8d1
+        uses: github/codeql-action/init@v3
         with:
           languages: javascript-typescript, python
           queries: security-extended,security-and-quality
 
-      # Pinned: github/codeql-action/analyze@v3.28.10
+      # Pinned: github/codeql-action/analyze@v3
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@9e2933d0140d0289fc2058506dcc226bb7f2a8d1
+        uses: github/codeql-action/analyze@v3

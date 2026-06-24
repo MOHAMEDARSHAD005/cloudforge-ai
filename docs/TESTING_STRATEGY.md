@@ -440,6 +440,32 @@ export default function () {
 ---
 
 ## CI Strategy
+## GitHub Workflow Testing
+
+Every workflow must be validated before merge.
+
+Required checks:
+
+* Workflow YAML validation
+* actionlint
+* Dependency installation verification
+* Security workflow execution verification
+* GitHub Action version verification
+
+Workflow failures are treated as CI failures.
+
+A workflow is not considered complete until validation succeeds on GitHub Actions.
+
+
+## GitHub Workflow Validation
+
+Every workflow must pass:
+
+- actionlint
+- YAML validation
+- dependency resolution checks
+
+CI failures caused by invalid GitHub Action references are treated as build failures.
 
 ### On Every PR
 

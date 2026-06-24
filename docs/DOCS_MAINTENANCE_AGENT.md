@@ -117,6 +117,73 @@ Run this checklist every time a task (from `PLAN.md`) is completed, in this orde
    observability policy itself (as opposed to *data about* those things). If a task seems to require
    editing one of these, stop and flag it for human review rather than editing it silently.
 
+## 2.1 GitHub Workflow Validation Requirements
+
+Whenever a task creates or modifies files under:
+
+```text
+.github/workflows/
+```
+
+the following validation steps are mandatory before the task can be marked complete in `PLAN.md`:
+
+### Workflow Validation
+
+Verify:
+
+* GitHub Actions workflow syntax is valid
+* Workflow triggers execute correctly
+* YAML files pass validation
+* Workflow permissions follow least-privilege principles
+
+### Action Version Validation
+
+Verify:
+
+* Referenced GitHub Actions versions exist
+* Referenced action SHAs resolve successfully
+* Pinned SHAs correspond to official releases
+* Deprecated action versions are not introduced
+
+Do not assume generated GitHub Action SHAs are valid.
+
+If an action version cannot be verified:
+
+* Use the official stable major release tag
+* Document the decision in the implementation summary
+* Create an ADR if the pinning strategy changes
+
+### Dependency Validation
+
+Verify:
+
+* Dependency installation succeeds in CI
+* pnpm workspace dependencies resolve cleanly
+* Peer dependency conflicts are resolved
+* No use of `--force` or `--legacy-peer-deps` unless explicitly approved through an ADR
+
+### Security Workflow Validation
+
+For security-related workflows:
+
+* Trivy scan executes successfully
+* CodeQL analysis executes successfully
+* Audit commands complete successfully
+* Reports upload successfully as workflow artifacts
+
+### Required Validation Commands
+
+Run before marking complete:
+
+```bash
+pnpm install
+pnpm lint
+pnpm type-check
+actionlint
+```
+
+Workflow-related tasks are not complete until all validation steps pass.
+
 ---
 
 ## 3. Hard Rules (never violate)
