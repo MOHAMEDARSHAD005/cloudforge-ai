@@ -152,17 +152,17 @@ The following are settled decisions — do not re-litigate without a new ADR:
 
 #### Tasks
 
-- [ ] Implement Planner Agent → `ProjectPlan`
-- [ ] Implement Architecture Agent → `ArchitectureModel`
-- [ ] Implement AWS Expert Agent → `AwsArchitecture`
-- [ ] Wire BullMQ: NestJS enqueues job, BullMQ Worker calls FastAPI `/generate`
-- [ ] WebSocket gateway in NestJS: emit `agent:started`, `agent:complete`, `agent:failed`, `job:complete` events
-- [ ] Artifact persistence: save all agent outputs as JSONB records in `artifacts` table
-- [ ] `JobEvent` records: write structured event history for every agent start/complete/fail
-- [ ] Token usage: capture `input_tokens`, `output_tokens`, `model_name` per agent call — persist in `token_usage` table
-- [ ] Resolve OQ-003: service-to-service auth (shared secret header + VPC SG rules)
-- [ ] Resolve OQ-001: model selection for this phase (benchmark Claude Sonnet for Planner/Architecture/AWS Expert)
-- [ ] Frontend: prompt input → polling job status via WebSocket → artifact display (read-only, unformatted)
+- [x] Implement Planner Agent → `ProjectPlan`
+- [x] Implement Architecture Agent → `ArchitectureModel`
+- [x] Implement AWS Expert Agent → `AwsArchitecture`
+- [x] Wire BullMQ: NestJS enqueues job, BullMQ Worker calls FastAPI `/generate`
+- [x] WebSocket gateway in NestJS: emit `agent:started`, `agent:complete`, `agent:failed`, `job:complete` events
+- [x] Artifact persistence: save all agent outputs as JSONB records in `artifacts` table
+- [x] `JobEvent` records: write structured event history for every agent start/complete/fail
+- [x] Token usage: capture `input_tokens`, `output_tokens`, `model_name` per agent call — persist in `token_usage` table
+- [x] Resolve OQ-003: service-to-service auth (shared secret header + VPC SG rules)
+- [x] Resolve OQ-001: model selection for this phase (benchmark Claude Sonnet for Planner/Architecture/AWS Expert)
+- [x] Frontend: prompt input → polling job status via WebSocket → artifact display (read-only, unformatted)
 
 #### Exit Criteria
 
@@ -170,13 +170,13 @@ Submit "Build a school ERP for 50,000 users" → Planner, Architecture, and AWS 
 
 #### Acceptance Criteria
 
-- [ ] `ProjectPlan`, `ArchitectureModel`, `AwsArchitecture` all pass Pydantic validation on every test run
-- [ ] `JobEvent` records written for every agent transition (start, complete, fail)
-- [ ] Token usage recorded per agent in `token_usage` table
-- [ ] WebSocket delivers `agent:complete` events in real time (verified in browser dev tools)
-- [ ] No raw LLM text stored in the database — only validated Pydantic → JSON payloads
-- [ ] Retry logic: BullMQ retries agent call up to 3 times on transient failure (5xx from LLM provider)
-- [ ] Each artifact JSONB payload includes `schema_version`, `prompt_version`, `model_name`, `provider_name`
+- [x] `ProjectPlan`, `ArchitectureModel`, `AwsArchitecture` all pass Pydantic validation on every test run
+- [x] `JobEvent` records written for every agent transition (start, complete, fail)
+- [x] Token usage recorded per agent in `token_usage` table
+- [x] WebSocket delivers `agent:complete` events in real time (verified in browser dev tools)
+- [x] No raw LLM text stored in the database — only validated Pydantic → JSON payloads
+- [x] Retry logic: BullMQ retries agent call up to 3 times on transient failure (5xx from LLM provider)
+- [x] Each artifact JSONB payload includes `schema_version`, `prompt_version`, `model_name`, `provider_name`
 
 ---
 

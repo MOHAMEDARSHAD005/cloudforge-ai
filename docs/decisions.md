@@ -29,6 +29,7 @@
 | ADR-018 | Repository Security Scanning & Vulnerability Audits | ✅ Accepted | June 2026 |
 | ADR-019 | GitHub Actions Version Pinning Strategy | ✅ Accepted | June 2026 |
 | ADR-020 | Phase 0 Security Gate Policy | ✅ Accepted | June 2026 |
+| ADR-021 | Shared Secret Authentication for Internal APIs | ✅ Accepted | June 2026 |
 
 ---
 
@@ -1365,3 +1366,37 @@ Rejected because the breaking changes in routers, caching models, and third-part
 Rejected because it would hide other security findings, losing audit transparency.
 
 ---
+
+## ADR-021: Shared Secret Authentication for Internal APIs
+
+**Status:** ✅ Accepted  
+**Date:** June 2026
+
+### Context
+FastAPI runs the orchestrator and makes calls to Claude 3.5 Sonnet. In turn, FastAPI must notify NestJS about agent status updates (`agent:started`, `agent:complete`, etc.). Both of these internal APIs (`api-nest` and `ai-fastapi`) are deployed in a private network (VPC) but need a simple, lightweight authentication mechanism to ensure that:
+1. Only authorized components within the private network can invoke the `/generate` pipeline on FastAPI.
+2. Only FastAPI can trigger event logging callbacks on NestJS (`POST /api/v1/jobs/:jobId/events`).
+
+### Decision
+Implement **Shared Secret Token Authentication** using a pre-shared API secret:
+1. Define a shared token via the `INTERNAL_API_SECRET` environment variable (defaults to a mock value for local development).
+2. For NestJS → FastAPI (`POST /generate`): The NestJS worker includes the token in the `X-Internal-Token` header.
+3. For FastAPI → NestJS (`POST /api/v1/jobs/:jobId/events`): The FastAPI callbacks module includes the token in the `X-Internal-Token` header.
+4. Both services reject any request with a missing or mismatched token header, throwing a `401 Unauthorized` HTTP error.
+
+### Consequences
+* ✅ Simple, lightweight setup with no external dependencies (e.g. OAuth providers, JWT signing keys).
+* ✅ Guarantees that internal routes cannot be accessed without the secret token.
+* ✅ Shared secret is easily injected via AWS ECS Task Definitions or Docker Compose.
+* ⚠️ The secret must be securely managed (e.g. AWS Secrets Manager or KMS) and rotated periodically.
+
+### Alternatives Rejected
+
+#### No Authentication
+Relying entirely on network isolation is risky, as any compromised internal container could make unlimited LLM calls or forge job events.
+
+#### Mutual TLS (mTLS)
+Highly secure but introduces massive setup and maintenance overhead for local development and Docker Compose.
+
+#### JWT Session-Based Authentication
+Overkill for service-to-service communication and requires JWT verification logic on both sides.

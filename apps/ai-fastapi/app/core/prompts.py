@@ -7,6 +7,7 @@ logger = structlog.get_logger()
 def load_agent_prompt(agent_name: str, version: str = "v1") -> str:
     possible_paths = [
         os.path.join(os.getcwd(), "packages", "shared-prompts", agent_name, f"{version}.md"),
+        os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "packages", "shared-prompts", agent_name, f"{version}.md"),
         os.path.join(os.path.dirname(__file__), "..", "..", "..", "packages", "shared-prompts", agent_name, f"{version}.md"),
         os.path.join("/app", "packages", "shared-prompts", agent_name, f"{version}.md"),
         os.path.join("/usr/src/app", "packages", "shared-prompts", agent_name, f"{version}.md")

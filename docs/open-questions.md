@@ -83,22 +83,16 @@ Prisma Migrate runs `ALTER TABLE` statements that can lock tables. For a multi-t
 
 ### OQ-003: Auth strategy for NestJS → FastAPI service-to-service calls?
 
-**Status:** `[~]` In Progress  
-**Phase:** Must resolve before Phase 1 exit criteria
+**Status:** `[✅]` Resolved  
+**Resolution:** See ADR-021 (Shared Secret Authentication for Internal APIs). VPC security group rules are reinforced with a shared secret token `X-Internal-Token` passed in headers for both `/generate` calls and NestJS event callbacks.
+
+**Phase:** Resolved in Phase 1
 
 **Context:**  
 NestJS BullMQ workers call FastAPI `/generate`. Currently there's no auth between them. In Docker Compose this is acceptable. In production on AWS (ECS tasks in a VPC) we need to ensure only NestJS can call FastAPI.
 
-**Recommendation:** VPC security group rules (only NestJS SG → FastAPI SG on port 8000) + a shared secret `X-Internal-Token` header as defence in depth. Implement in Phase 1.
-
-**Options:**
-
-| Option | Pros | Cons |
-|---|---|---|
-| Shared secret header (`X-Internal-Token`) | Simple, fast to implement | Secret rotation is manual |
-| VPC security group rules only | Zero code, pure infrastructure | No audit trail at app level |
-| AWS IAM + ECS task roles (SigV4 signing) | Gold standard | Complex to implement |
-| mTLS between services | Strong mutual auth | High operational overhead |
+**Resolution Details:**
+VPC security group rules (only NestJS SG → FastAPI SG on port 8000) are used in production, alongside a shared secret `X-Internal-Token` header as defence in depth. FastAPI calls back to NestJS using the same token.
 
 **Owner:** Engineering Lead
 
@@ -369,6 +363,7 @@ Owner: Engineering Lead
 
 | OQ | Question | Resolution | ADR |
 |---|---|---|---|
+| OQ-003 | Auth strategy for service-to-service calls? | Shared secret token header (X-Internal-Token) | ADR-021 |
 | OQ-009 | How to version artifact outputs? | schema_version + prompt_version in every artifact | ADR-011, ADR-012 |
 | OQ-017 | Which merge strategy should be used? | Squash Merge | ADR-017 |
 | — | Should we use a monorepo? | Yes, Turborepo | ADR-001 |
