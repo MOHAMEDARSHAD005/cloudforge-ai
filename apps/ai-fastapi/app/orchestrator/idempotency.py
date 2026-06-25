@@ -1,14 +1,31 @@
 import os
+import re
+import urllib.parse
 import httpx
 import structlog
+from app.core.config import INTERNAL_API_URL
 
 logger = structlog.get_logger()
 
-INTERNAL_API_URL = os.getenv("INTERNAL_API_URL", "http://localhost:3000")
 INTERNAL_API_SECRET = os.getenv("INTERNAL_API_SECRET", "mock-internal-secret-123")
 
+JOB_ID_REGEX = re.compile(r"^[a-zA-Z0-9_\-]+$")
+ALLOWED_ARTIFACT_TYPES = {"PLAN", "ARCHITECTURE", "AWS_ARCHITECTURE", "SECURITY", "COST", "TERRAFORM", "DIAGRAM", "REVIEW"}
+
+def validate_job_id(job_id: str) -> None:
+    if not job_id or not JOB_ID_REGEX.match(job_id):
+        raise ValueError(f"Invalid job ID format: {job_id}")
+
+def validate_artifact_type(artifact_type: str) -> None:
+    if artifact_type not in ALLOWED_ARTIFACT_TYPES:
+        raise ValueError(f"Invalid artifact type: {artifact_type}")
+
 async def get_existing_artifact(job_id: str, artifact_type: str, trace_id: str = None) -> dict | None:
-    url = f"{INTERNAL_API_URL}/api/v1/artifacts/internal/job/{job_id}/type/{artifact_type}"
+    validate_job_id(job_id)
+    validate_artifact_type(artifact_type)
+    encoded_job_id = urllib.parse.quote(job_id)
+    encoded_artifact_type = urllib.parse.quote(artifact_type)
+    url = f"{INTERNAL_API_URL}/api/v1/artifacts/internal/job/{encoded_job_id}/type/{encoded_artifact_type}"
     headers = {
         "X-Internal-Token": INTERNAL_API_SECRET,
         "X-Trace-Id": trace_id or ""

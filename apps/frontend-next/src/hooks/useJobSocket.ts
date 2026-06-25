@@ -1,12 +1,12 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { io, Socket } from 'socket.io-client';
+import { io } from 'socket.io-client';
 
 export interface JobEvent {
   id?: string;
   jobId: string;
   agent: string | null;
   event: string;
-  payload?: any;
+  payload?: unknown;
   timestamp: string;
 }
 
@@ -20,12 +20,41 @@ export interface JobState {
   traceId: string;
 }
 
+export interface Artifact {
+  id: string;
+  projectId: string;
+  type: string;
+  payload: unknown;
+  schemaVersion: string;
+  promptVersion: string;
+  modelName: string;
+  providerName: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProjectState {
+  id: string;
+  prompt: string;
+  createdAt: string;
+  updatedAt: string;
+  artifacts?: Artifact[];
+}
+
+export interface PipelineEventData {
+  jobId: string;
+  agent: string | null;
+  event: string;
+  payload?: unknown;
+  timestamp: string;
+  error?: string;
+}
+
 export function useJobSocket(jobId: string) {
-  const [socket, setSocket] = useState<Socket | null>(null);
   const [connected, setConnected] = useState(false);
   const [jobEvents, setJobEvents] = useState<JobEvent[]>([]);
   const [jobState, setJobState] = useState<JobState | null>(null);
-  const [projectState, setProjectState] = useState<any | null>(null);
+  const [projectState, setProjectState] = useState<ProjectState | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -55,12 +84,13 @@ export function useJobSocket(jobId: string) {
       if (['COMPLETE', 'FAILED', 'PARTIAL'].includes(jobData.status)) {
         const projectRes = await fetch(`http://localhost:3000/api/v1/projects/${jobData.projectId}`);
         if (projectRes.ok) {
-          const projectData = await projectRes.json();
+          const projectData: ProjectState = await projectRes.json();
           setProjectState(projectData);
         }
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to load job details');
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : 'Failed to load job details';
+      setError(errMsg);
     } finally {
       setLoading(false);
     }
@@ -81,20 +111,15 @@ export function useJobSocket(jobId: string) {
 
     socketClient.on('connect', () => {
       setConnected(true);
-      console.log('Connected to socket server');
-      // Subscribe immediately
       socketClient.emit('job:subscribe', { jobId });
     });
 
     socketClient.on('disconnect', () => {
       setConnected(false);
-      console.log('Disconnected from socket server');
     });
 
     // Listeners for all pipeline events
-    const handlePipelineEvent = (data: any) => {
-      console.log('Received pipeline event:', data);
-      
+    const handlePipelineEvent = (data: PipelineEventData) => {
       setJobEvents((prev) => {
         // Prevent duplicate events
         const exists = prev.some((e) => e.event === data.event && e.agent === data.agent);
@@ -109,7 +134,7 @@ export function useJobSocket(jobId: string) {
         setJobState((prev) => prev ? { ...prev, status: 'COMPLETE' } : null);
         fetchJobData();
       } else if (data.event === 'job:failed') {
-        setJobState((prev) => prev ? { ...prev, status: 'FAILED', errorMessage: data.error } : null);
+        setJobState((prev) => prev ? { ...prev, status: 'FAILED', errorMessage: data.error || null } : null);
         fetchJobData();
       }
     };
@@ -120,8 +145,6 @@ export function useJobSocket(jobId: string) {
     socketClient.on('agent:started', handlePipelineEvent);
     socketClient.on('agent:complete', handlePipelineEvent);
     socketClient.on('agent:failed', handlePipelineEvent);
-
-    setSocket(socketClient);
 
     return () => {
       socketClient.emit('job:unsubscribe', { jobId });

@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
-import { ArtifactType } from '@cloudforge/shared-config';
 
 @Injectable()
 export class ArtifactsService {

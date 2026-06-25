@@ -42,3 +42,23 @@ def get_agent_model_identifier(agent_name: str) -> str:
 def get_agent_model_config_name(agent_name: str) -> str:
     config = AGENT_DEFAULTS.get(agent_name, AGENT_DEFAULTS["planner"])
     return config["model"]
+
+import urllib.parse
+
+def validate_and_get_internal_api_url() -> str:
+    raw_url = os.getenv("INTERNAL_API_URL", "http://localhost:3000")
+    parsed = urllib.parse.urlparse(raw_url)
+    
+    if parsed.scheme not in ("http", "https"):
+        raise ValueError(f"Invalid scheme for INTERNAL_API_URL: {parsed.scheme}. Only http and https are allowed.")
+    
+    if parsed.username or parsed.password:
+        raise ValueError("INTERNAL_API_URL must not contain embedded credentials.")
+        
+    if not parsed.hostname:
+        raise ValueError("INTERNAL_API_URL must contain a valid hostname.")
+        
+    port_str = f":{parsed.port}" if parsed.port is not None else ""
+    return f"{parsed.scheme}://{parsed.hostname}{port_str}"
+
+INTERNAL_API_URL = validate_and_get_internal_api_url()

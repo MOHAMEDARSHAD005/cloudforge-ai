@@ -1,4 +1,3 @@
-import json
 from pydantic_ai import Agent
 from app.models.planner import ProjectPlan
 from app.models.aws_expert import AwsArchitecture

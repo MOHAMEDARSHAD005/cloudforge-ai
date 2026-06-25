@@ -1,12 +1,11 @@
 import pytest
-import asyncio
 from unittest.mock import AsyncMock, patch
 from pydantic import BaseModel, ValidationError
 from pydantic_ai import RunUsage
 
 from app.orchestrator.token_accounting import calculate_cost
 from app.core.prompts import load_agent_prompt
-from app.core.retry import run_agent_with_retry, FatalAgentError
+from app.core.retry import FatalAgentError
 from app.agents.planner import run_planner, planner_agent
 from app.agents.architecture import run_architecture, architecture_agent
 from app.agents.aws_expert import run_aws_expert, aws_expert_agent
@@ -18,11 +17,12 @@ from app.models.aws_expert import AwsArchitecture
 class DummyModel(BaseModel):
     name: str
 
-def get_validation_error():
+def get_validation_error() -> ValidationError:
     try:
         DummyModel(name=[1, 2])
     except ValidationError as e:
         return e
+    raise ValueError("Expected ValidationError was not raised")
 
 class MockRunResult:
     def __init__(self, output, input_tokens=10, output_tokens=20):

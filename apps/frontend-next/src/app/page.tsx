@@ -60,8 +60,9 @@ export default function Home() {
       const data = await response.json();
       // Redirect to the jobs routing view
       router.push(`/jobs/${data.jobId}`);
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong. Make sure api-nest is online.');
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : 'Something went wrong. Make sure api-nest is online.';
+      setError(errMsg);
     } finally {
       setSubmitting(false);
     }

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useJobSocket } from '../../../hooks/useJobSocket';
+import { useJobSocket, Artifact } from '../../../hooks/useJobSocket';
 
 export default function JobDetailPage() {
   const params = useParams();
@@ -30,9 +30,13 @@ export default function JobDetailPage() {
     const completeEvent = jobEvents.find((e) => e.agent === agent && e.event === 'agent:complete');
     if (!completeEvent || !completeEvent.payload) return null;
 
-    const payload = completeEvent.payload;
-    const durationMs = payload.durationMs || 0;
-    const tokenUsage = payload.tokenUsage || { input: 0, output: 0 };
+    const payload = completeEvent.payload as {
+      durationMs?: number;
+      tokenUsage?: { input: number; output: number };
+      payload?: { model_name?: string };
+    };
+    const durationMs = payload?.durationMs || 0;
+    const tokenUsage = payload?.tokenUsage || { input: 0, output: 0 };
     
     // Derived USD cost logic
     let costUsd = 0;
@@ -51,7 +55,7 @@ export default function JobDetailPage() {
   // Extract artifact payloads
   const getArtifactPayload = (type: 'PLAN' | 'ARCHITECTURE' | 'AWS_ARCHITECTURE') => {
     if (!projectState || !projectState.artifacts) return null;
-    const artifact = projectState.artifacts.find((a: any) => a.type === type);
+    const artifact = projectState.artifacts.find((a: Artifact) => a.type === type);
     return artifact ? artifact.payload : null;
   };
 
