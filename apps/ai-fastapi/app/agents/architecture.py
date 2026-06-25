@@ -4,9 +4,10 @@ from app.models.planner import ProjectPlan
 from app.models.architecture import ArchitectureModel
 from app.core.prompts import load_agent_prompt
 from app.core.retry import run_agent_with_retry
+from app.core.config import get_agent_model_identifier
 
 architecture_agent = Agent(
-    'anthropic:claude-3-5-sonnet-latest',
+    get_agent_model_identifier("architecture"),
     output_type=ArchitectureModel,
     system_prompt=load_agent_prompt("architecture", "v1")
 )

@@ -4,9 +4,10 @@ from app.models.planner import ProjectPlan
 from app.models.aws_expert import AwsArchitecture
 from app.core.prompts import load_agent_prompt
 from app.core.retry import run_agent_with_retry
+from app.core.config import get_agent_model_identifier
 
 aws_expert_agent = Agent(
-    'anthropic:claude-3-5-sonnet-latest',
+    get_agent_model_identifier("aws_expert"),
     output_type=AwsArchitecture,
     system_prompt=load_agent_prompt("aws-expert", "v1")
 )

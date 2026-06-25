@@ -1373,7 +1373,7 @@ Rejected because it would hide other security findings, losing audit transparenc
 **Date:** June 2026
 
 ### Context
-FastAPI runs the orchestrator and makes calls to Claude 3.5 Sonnet. In turn, FastAPI must notify NestJS about agent status updates (`agent:started`, `agent:complete`, etc.). Both of these internal APIs (`api-nest` and `ai-fastapi`) are deployed in a private network (VPC) but need a simple, lightweight authentication mechanism to ensure that:
+FastAPI runs the orchestrator and makes calls to claude-sonnet-4-6. In turn, FastAPI must notify NestJS about agent status updates (`agent:started`, `agent:complete`, etc.). Both of these internal APIs (`api-nest` and `ai-fastapi`) are deployed in a private network (VPC) but need a simple, lightweight authentication mechanism to ensure that:
 1. Only authorized components within the private network can invoke the `/generate` pipeline on FastAPI.
 2. Only FastAPI can trigger event logging callbacks on NestJS (`POST /api/v1/jobs/:jobId/events`).
 

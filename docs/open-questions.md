@@ -27,10 +27,10 @@
 
 **Context:**  
 The system makes 6–8 LLM calls per job. Different agents have different needs:
-- Planner + Architecture + Reviewer: strong reasoning
-- Terraform Agent: code generation ability
-- Cost Agent: numerical accuracy
-- Diagram Agent: structured JSON output only (simpler model acceptable)
+- Planner + Architecture + Reviewer: strong reasoning (using `claude-sonnet-4-6`)
+- Terraform Agent: code generation ability (using `claude-sonnet-4-6`)
+- Cost Agent: numerical accuracy (using `claude-sonnet-4-6`)
+- Diagram Agent: structured JSON output only (using `claude-haiku-4-5`)
 
 Using the same model for every agent is wasteful and expensive.
 
@@ -38,8 +38,8 @@ Using the same model for every agent is wasteful and expensive.
 
 | Option | Pros | Cons |
 |---|---|---|
-| Claude Sonnet 4.6 for all agents | Consistent, strong reasoning, good structured output | Higher cost per job |
-| Claude Sonnet for reasoning, Claude Haiku for simple (Cost, Diagram) | Lower cost per job | Two SDK configurations |
+| `claude-sonnet-4-6` for all agents | Consistent, strong reasoning, good structured output | Higher cost per job |
+| `claude-sonnet-4-6` for reasoning, `claude-haiku-4-5` for simple (Cost, Diagram) | Lower cost per job | Two SDK configurations |
 | OpenAI GPT-4o (reasoning) + GPT-4o-mini (simple) | Strong code gen for Terraform | OpenAI vendor lock-in |
 | Provider abstraction (swap per agent) | Maximum flexibility | More complex agent factory |
 
@@ -48,7 +48,7 @@ Using the same model for every agent is wasteful and expensive.
 - What is the cost per job for each tier combination?
 - What is the token budget per agent that keeps total job cost < $0.08?
 
-**Recommended next step:** Build Planner + Architecture agents first. Benchmark Claude Sonnet cost/quality. Run Diagram Agent with Haiku for cost comparison. Decide model split in Phase 1 exit review.
+**Recommended next step:** Benchmarked model selection is set to `claude-sonnet-4-6` for Planner/Architecture/AWS Expert reasoning agents, and `claude-haiku-4-5` for structured diagram generation. Decide final model split in Phase 1 exit review.
 
 **Owner:** Engineering Lead
 

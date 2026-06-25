@@ -15,13 +15,13 @@ async def send_nestjs_callback(job_id: str, event_payload: dict, trace_id: str =
         "Content-Type": "application/json"
     }
     
-    logger.info("sending_nestjs_callback", job_id=job_id, event=event_payload.get("event"), url=url, trace_id=trace_id)
+    logger.info("sending_nestjs_callback", job_id=job_id, cb_event=event_payload.get("event"), url=url, trace_id=trace_id)
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.post(url, json=event_payload, headers=headers)
             # Accept any 2xx status code
             if 200 <= response.status_code < 300:
-                logger.info("nestjs_callback_success", job_id=job_id, event=event_payload.get("event"))
+                logger.info("nestjs_callback_success", job_id=job_id, cb_event=event_payload.get("event"))
                 return True
             else:
                 logger.error(

@@ -6,6 +6,7 @@ from app.agents import run_planner, run_architecture, run_aws_expert
 from app.orchestrator.callbacks import send_nestjs_callback
 from app.orchestrator.idempotency import get_existing_artifact
 from app.models import ProjectPlan, ArchitectureModel, AwsArchitecture
+from app.core.config import get_agent_model_config_name
 
 logger = structlog.get_logger()
 
@@ -32,7 +33,7 @@ async def run_pipeline(job_id: str, requirement: str, trace_id: str = None) -> d
         try:
             plan, usage = await run_planner(requirement, trace_id=trace_id)
             duration_ms = int((time.time() - start_time) * 1000)
-            populate_provenance(plan, "planner/v1")
+            populate_provenance(plan, "planner/v1", get_agent_model_config_name("planner"))
             
             await send_nestjs_callback(job_id, {
                 "event": "agent:complete",
@@ -65,7 +66,7 @@ async def run_pipeline(job_id: str, requirement: str, trace_id: str = None) -> d
         try:
             arch, usage = await run_architecture(plan, trace_id=trace_id)
             duration_ms = int((time.time() - start_time) * 1000)
-            populate_provenance(arch, "architecture/v1")
+            populate_provenance(arch, "architecture/v1", get_agent_model_config_name("architecture"))
             
             await send_nestjs_callback(job_id, {
                 "event": "agent:complete",
@@ -95,7 +96,7 @@ async def run_pipeline(job_id: str, requirement: str, trace_id: str = None) -> d
         try:
             aws, usage = await run_aws_expert(plan, trace_id=trace_id)
             duration_ms = int((time.time() - start_time) * 1000)
-            populate_provenance(aws, "aws-expert/v1")
+            populate_provenance(aws, "aws-expert/v1", get_agent_model_config_name("aws_expert"))
             
             await send_nestjs_callback(job_id, {
                 "event": "agent:complete",

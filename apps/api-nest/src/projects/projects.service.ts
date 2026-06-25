@@ -16,29 +16,29 @@ export class ProjectsService {
     private readonly jobEventsService: JobEventsService,
   ) {}
 
-  private async ensureMockUser() {
+  private async ensureUser(userId: string) {
     return this.prisma.user.upsert({
-      where: { id: this.defaultUserId },
+      where: { id: userId },
       update: {},
       create: {
-        id: this.defaultUserId,
-        email: 'developer@cloudforge.ai',
+        id: userId,
+        email: `${userId}@cloudforge.ai`,
         passwordHash: 'argon2-dummy-hash',
       },
     });
   }
 
-  async createProject(prompt: string) {
-    this.logger.log(`Creating project with prompt: "${prompt}"`);
+  async createProject(prompt: string, userId: string = this.defaultUserId) {
+    this.logger.log(`Creating project with prompt: "${prompt}" for user ${userId}`);
     
-    // Ensure mock user exists in database to satisfy foreign keys
-    await this.ensureMockUser();
+    // Ensure user exists in database to satisfy foreign keys
+    await this.ensureUser(userId);
 
     // 1. Create Project and Job records inside a transaction for atomic safety
     const { project, job } = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const project = await tx.project.create({
         data: {
-          userId: this.defaultUserId,
+          userId: userId,
           prompt,
           status: 'PENDING',
         },
@@ -73,17 +73,18 @@ export class ProjectsService {
     };
   }
 
-  async listProjects() {
-    this.logger.log('Listing all projects');
+  async listProjects(userId: string = this.defaultUserId) {
+    this.logger.log(`Listing all projects for user ${userId}`);
     return this.prisma.project.findMany({
+      where: { userId },
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  async getProject(id: string) {
-    this.logger.log(`Fetching project: ${id}`);
-    const project = await this.prisma.project.findUnique({
-      where: { id },
+  async getProject(id: string, userId: string = this.defaultUserId) {
+    this.logger.log(`Fetching project: ${id} for user ${userId}`);
+    const project = await this.prisma.project.findFirst({
+      where: { id, userId },
       include: {
         jobs: true,
         artifacts: true,
@@ -97,12 +98,12 @@ export class ProjectsService {
     return project;
   }
 
-  async deleteProject(id: string) {
-    this.logger.log(`Deleting project: ${id}`);
+  async deleteProject(id: string, userId: string = this.defaultUserId) {
+    this.logger.log(`Deleting project: ${id} for user ${userId}`);
     
-    // Check project existence
-    const project = await this.prisma.project.findUnique({
-      where: { id },
+    // Check project existence and ownership
+    const project = await this.prisma.project.findFirst({
+      where: { id, userId },
       select: { id: true },
     });
 

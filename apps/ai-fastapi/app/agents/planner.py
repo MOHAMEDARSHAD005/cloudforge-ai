@@ -2,9 +2,10 @@ from pydantic_ai import Agent
 from app.models.planner import ProjectPlan
 from app.core.prompts import load_agent_prompt
 from app.core.retry import run_agent_with_retry
+from app.core.config import get_agent_model_identifier
 
 planner_agent = Agent(
-    'anthropic:claude-3-5-sonnet-latest',
+    get_agent_model_identifier("planner"),
     output_type=ProjectPlan,
     system_prompt=load_agent_prompt("planner", "v1")
 )
