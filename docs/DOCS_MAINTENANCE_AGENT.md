@@ -34,6 +34,7 @@ completion is **never** a reason to edit these.
 | `FAILURE_MATRIX.md` | Failure classification, retry policy, fallback behavior. Policy, not status. | New ADR changes retry/fallback policy |
 | `OBSERVABILITY.md` | Logging format, metric names, dashboard definitions, alert thresholds. Policy, not status. | New ADR changes observability strategy |
 | `PROMPT_VERSIONING.md` (policy sections only — see 1.3) | The *rules* of how prompt versioning works never change casually. | New ADR changes the versioning policy itself |
+| `VERSIONING.md` (SemVer policy section only — see 1.3) | The major/minor/patch definition for app releases is a settled convention, not a status. | New ADR changes the SemVer policy itself |
 
 **Rule of thumb:** if the file answers "how does this system work / how should it behave", it's static.
 
@@ -51,10 +52,11 @@ touches them, not just at milestones.
 | `RUNBOOKS.md` | New runbook added when a new alert is created; runbook steps refined after a real incident | New alert defined in `OBSERVABILITY.md`, or postmortem from a real incident |
 | `TESTING_STRATEGY.md` | New test tier/suite added as it's actually built; golden dataset size, coverage notes | New test infrastructure stood up |
 | `PROMPT_VERSIONING.md` (changelog sections only — see 1.3) | New prompt version entries, migration log | Every time a prompt file version is bumped (e.g. `planner/v1.md` → `v2.md`) |
+| `TECHDEBT.md` | New debt entries appended when a risk is knowingly accepted; entries closed/removed when actually remediated | Every time a vulnerability, deprecated dependency, or known shortcut is deferred rather than fixed immediately, or later resolved |
 
 ### 1.3 Special case — mixed files (split static policy from dynamic log)
 
-Two files contain **both** a static policy section and a dynamic log/index section. Treat them as
+Three files contain **both** a static policy section and a dynamic log/index section. Treat them as
 two zones in the same file:
 
 - **`decisions.md`**
@@ -69,6 +71,15 @@ two zones in the same file:
     rule).
   - Dynamic zone: the changelog/version table that lists which prompt versions exist for which agent
     and when they shipped. Append-only — never edit a past entry, only add new ones.
+
+- **`VERSIONING.md`**
+  - Static zone: the SemVer definition for app releases (what counts as major/minor/patch) and the
+    summary statement that prompts follow `PROMPT_VERSIONING.md`'s immutable-file convention. This
+    is a settled policy, not a log.
+  - Dynamic zone: none by default — `VERSIONING.md` itself stays policy-only. If a release log or
+    tag history is ever added to this file, treat that addition as a dynamic zone the same way the
+    other two files above are split. Until then, the only legitimate edit is a policy change, which
+    requires a new ADR (same exception path as the static table in 1.1).
 
 ---
 
@@ -108,11 +119,20 @@ Run this checklist every time a task (from `PLAN.md`) is completed, in this orde
    dataset entries)? If yes, record it. Routine new unit tests for existing tiers do not require an
    update here — only structural additions to the testing approach.
 
-7. **`project-context.md`** — Only touch this if the task changed the actual stack/tooling (e.g.
+7. **`TECHDEBT.md`** — Did this task knowingly defer a fix (accepted a CVE/advisory rather than
+   patching it, kept a deprecated dependency, shipped a known shortcut to hit a Phase exit date)?
+   If yes, append a new `TECHDEBT-0XX` entry using the existing format (Status → Date Identified →
+   Target Remediation Phase → Vulnerabilities/Issue Tracked → Business Justification → Remediation
+   Path). Conversely, did this task actually remediate an existing entry (e.g. the Phase 1 framework
+   upgrade that closes `TECHDEBT-001`/`002`/`003`/`004`)? If yes, mark that entry's Status as
+   `✅ Resolved` with the date and the PR/commit that fixed it — do not delete the entry, so there is
+   a record of debt that was taken on and later paid down.
+
+8. **`project-context.md`** — Only touch this if the task changed the actual stack/tooling (e.g.
    migrated BullMQ → SQS for real), or if a phase boundary was crossed (update "Document Map" or
    scale targets only with real measured data — never speculative numbers).
 
-8. **Everything in section 1.1** — Do not touch unless the task included an explicit, human-approved
+9. **Everything in section 1.1** — Do not touch unless the task included an explicit, human-approved
    change to system design, agent contracts, sequence/lifecycle behavior, failure policy, or
    observability policy itself (as opposed to *data about* those things). If a task seems to require
    editing one of these, stop and flag it for human review rather than editing it silently.
@@ -193,8 +213,9 @@ Workflow-related tasks are not complete until all validation steps pass.
 - **Never check off a `PLAN.md` acceptance criterion you have not verified.** "I wrote the code" is
   not "the test passes."
 - **Never edit the body of an already-Accepted ADR.** Supersede it with a new ADR instead.
-- **Never delete history.** `decisions.md`, `open-questions.md`'s Resolved table, and
-  `PROMPT_VERSIONING.md`'s changelog are append-only logs.
+- **Never delete history.** `decisions.md`, `open-questions.md`'s Resolved table,
+  `PROMPT_VERSIONING.md`'s changelog, and `TECHDEBT.md` are append-only logs — mark debt entries
+  `✅ Resolved` when fixed, never delete the entry.
 - **Always cross-link.** When you resolve an OQ, reference the ADR number. When you add a runbook,
   reference the alert it's linked to. When you add an ADR, reference any OQ it resolves.
 - **One task, one coherent update pass.** Don't update unrelated dynamic files "while you're in
@@ -233,9 +254,11 @@ audit trail of what documentation changed and why. Keep entries terse — one pa
 | `FAILURE_MATRIX.md` | Static | No |
 | `OBSERVABILITY.md` | Static + append-only tables | Only when new metric/alert added |
 | `PROMPT_VERSIONING.md` | Mixed | Policy: no. Changelog: yes, on prompt version bump |
+| `VERSIONING.md` | Mixed (policy-only today) | No, unless the SemVer policy itself changes (needs an ADR) |
 | `PLAN.md` | Dynamic | Yes — always |
 | `project-context.md` | Dynamic | Only on real stack/SLO change |
 | `decisions.md` | Mixed | Index + new ADRs: yes, when applicable. Old ADR bodies: never |
 | `open-questions.md` | Dynamic | Yes — whenever status changes |
 | `RUNBOOKS.md` | Dynamic | Only when new alert added or real incident teaches something |
 | `TESTING_STRATEGY.md` | Dynamic | Only on structural test additions |
+| `TECHDEBT.md` | Dynamic | Yes — whenever a fix is knowingly deferred or an existing entry is remediated |

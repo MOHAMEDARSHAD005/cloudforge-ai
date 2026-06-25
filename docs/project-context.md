@@ -256,3 +256,7 @@ The following are explicitly out of scope until stated otherwise:
 | `docs/RUNBOOKS.md` | Operational runbooks for every alert |
 | `docs/TESTING_STRATEGY.md` | Unit, integration, E2E, golden dataset, chaos tests |
 | `docs/PROMPT_VERSIONING.md` | Prompt versioning policy and migration strategy |
+| `VERSIONING.md` | App-level SemVer policy (major/minor/patch) for releases; root-level summary of prompt versioning rules |
+| `TECHDEBT.md` | Accepted technical debt log: deferred CVEs/advisories, business justification, target remediation phase |
+| `CONTRIBUTING.md` | Contributor workflow: branch naming, commit conventions, code safety/quality standards |
+| `docs/DOCS_MAINTENANCE_AGENT.md` | Static vs. dynamic doc classification and the per-task doc-update procedure |
