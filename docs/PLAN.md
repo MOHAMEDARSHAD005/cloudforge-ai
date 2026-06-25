@@ -166,7 +166,7 @@ The following are settled decisions — do not re-litigate without a new ADR:
 
 #### Exit Criteria
 
-Submit "Build a school ERP for 50,000 users" → Planner, Architecture, and AWS Expert outputs visible in UI. Job completes in under 90 seconds.
+Submit "Build a school ERP for 50,000 users" → Planner, Architecture, and AWS Expert outputs visible in UI. Job completes in under 90 seconds. [Verified: June 25, 2026]
 
 #### Acceptance Criteria
 
