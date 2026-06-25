@@ -1,0 +1,13 @@
+{
+  "venvPath": "apps/ai-fastapi",
+  "venv": ".venv",
+  "extraPaths": [
+    "apps/ai-fastapi"
+  ],
+  "exclude": [
+    "**/node_modules",
+    "**/__pycache__",
+    "apps/api-nest",
+    "apps/frontend-next"
+  ]
+}

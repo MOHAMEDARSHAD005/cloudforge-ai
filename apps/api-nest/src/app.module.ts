@@ -5,7 +5,9 @@ import { ProjectsModule } from './projects/projects.module';
 import { JobsModule } from './jobs/jobs.module';
 import { ArtifactsModule } from './artifacts/artifacts.module';
 import { HealthModule } from './health/health.module';
-import { PrismaService } from './prisma.service';
+import { PrismaModule } from './prisma.module';
+import { QueueModule } from './queue/queue.module';
+import { WebsocketModule } from './websocket/websocket.module';
 import { AppLogger } from './common/logger/logger.service';
 import { TraceMiddleware } from './common/middleware/trace.middleware';
 
@@ -15,21 +17,23 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    PrismaModule,
     AuthModule,
     ProjectsModule,
     JobsModule,
     ArtifactsModule,
     HealthModule,
+    QueueModule,
+    WebsocketModule,
   ],
   providers: [
-    PrismaService, 
     AppLogger,
     {
       provide: APP_INTERCEPTOR,
       useClass: LoggingInterceptor,
     }
   ],
-  exports: [PrismaService, AppLogger],
+  exports: [AppLogger],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

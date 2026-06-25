@@ -53,8 +53,8 @@ packages/shared-prompts/
 
 - `v1.md`, `v2.md`, `v3.md` — no decimals, no dates, no feature names
 - Version numbers are monotonically increasing integers
-- The active version for each agent is set in `packages/shared-config/agent-defaults.ts`
-- A version file that exists in the repo but is not referenced in `agent-defaults.ts` is a draft
+- The active version for each agent is set in `packages/shared-config/src/index.ts`
+- A version file that exists in the repo but is not referenced in `packages/shared-config/src/index.ts` is a draft
 
 ---
 
@@ -154,7 +154,7 @@ If this returns > 0, `planner/v1.md` is sealed.
 The active prompt version per agent is controlled by a single config file:
 
 ```typescript
-// packages/shared-config/agent-defaults.ts
+// packages/shared-config/src/index.ts
 
 export const AGENT_DEFAULTS = {
   planner:      { promptVersion: 'v1', model: 'claude-sonnet-4-6', maxTokens: 2000, maxRetries: 3 },
@@ -399,7 +399,7 @@ pytest tests/golden/test_planner_golden.py -v \
 The golden test suite runs in CI on every PR that touches:
 - `packages/shared-prompts/**/*.md`
 - `apps/ai-fastapi/models/**/*.py`
-- `packages/shared-config/agent-defaults.ts`
+- `packages/shared-config/src/index.ts`
 
 Golden tests must pass before merge. No exceptions.
 
@@ -424,7 +424,7 @@ The most common case. You want the planner to produce more detailed execution ph
 9. Monitor for 30 minutes: watch Pydantic validation failure rate
 10. Update `CHANGELOG.md` in `packages/shared-prompts/planner/`
 
-**Rollback:** Change `promptVersion` back to `v1` in `agent-defaults.ts` and redeploy. Takes < 5 minutes.
+**Rollback:** Change `promptVersion` back to `v1` in `packages/shared-config/src/index.ts` and redeploy. Takes < 5 minutes.
 
 ---
 
@@ -484,7 +484,7 @@ A new prompt version is causing a Pydantic validation spike (see RB-013).
 
 **Steps (< 5 minutes):**
 
-1. In `packages/shared-config/agent-defaults.ts`: change `promptVersion` back to previous version
+1. In `packages/shared-config/src/index.ts`: change `promptVersion` back to previous version
 2. Commit with message: `revert: rollback planner prompt to v1 (validation failure spike)`
 3. Push to `main` — CI/CD deploys FastAPI automatically (~3 minutes)
 4. Monitor validation failure rate — should drop immediately
@@ -543,7 +543,7 @@ Users can trigger re-generation of any artifact from the UI. Re-generation behav
 
 | Behavior | Detail |
 |---|---|
-| Uses current prompt version | `agent-defaults.ts` determines the prompt version at run time |
+| Uses current prompt version | `packages/shared-config/src/index.ts` determines the prompt version at run time |
 | New artifact is created | Does NOT overwrite the old artifact |
 | Both artifacts are queryable | Old artifact retains its `prompt_version: "v1"`, new has `prompt_version: "v2"` |
 | UI shows latest by default | `ORDER BY created_at DESC LIMIT 1` per artifact type per project |
@@ -684,7 +684,7 @@ Use this checklist for every prompt change PR:
 |---|---|
 | Never overwrite a prompt | Create `v2.md`, keep `v1.md` forever |
 | Immutability trigger | First production job using that version |
-| Active version config | `packages/shared-config/agent-defaults.ts` |
+| Active version config | `packages/shared-config/src/index.ts` |
 | Test before activation | Golden dataset suite must pass |
 | Schema version format | `MAJOR.MINOR` — minor for additive, major for breaking |
 | Artifact provenance | Every artifact stores `schema_version`, `prompt_version`, `model_name`, `provider_name` |

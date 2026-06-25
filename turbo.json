@@ -1,5 +1,12 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalPassThroughEnv": [
+    "DATABASE_URL",
+    "REDIS_HOST",
+    "REDIS_PORT",
+    "INTERNAL_API_SECRET",
+    "INTERNAL_AI_SERVICE_URL"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
