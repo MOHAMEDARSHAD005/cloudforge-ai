@@ -223,7 +223,7 @@ Per ADR-013, we track token usage per agent. But tracking after the fact doesn't
 | Job-level token budget with early abort | Stops job if cumulative tokens exceed budget | Complex abort logic |
 | Alert-only (no enforcement) | Simple | Cost spike before alert fires |
 
-**Recommended approach:** Always set `max_tokens` in LLM API calls (per-agent budget in `agent-defaults.ts`). Add pre-flight context length estimate as a warning (not hard stop) in Phase 3. Hard budget enforcement in Phase 5 if token spike alerts prove insufficient.
+**Recommended approach:** Always set `max_tokens` in LLM API calls (per-agent budget in `packages/shared-config/src/index.ts`). Add pre-flight context length estimate as a warning (not hard stop) in Phase 3. Hard budget enforcement in Phase 5 if token spike alerts prove insufficient.
 
 **Owner:** Engineering Lead
 

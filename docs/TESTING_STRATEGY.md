@@ -242,7 +242,7 @@ PROMPT_VERSION=v2 pytest apps/ai-fastapi/tests/golden/ --output=results_v2.json
 python scripts/compare_prompt_versions.py results_v1.json results_v2.json
 ```
 
-**Gate:** A new prompt version may only be set as default in `agent-defaults.ts` if:
+**Gate:** A new prompt version may only be set as default in `packages/shared-config/src/index.ts` if:
 - Schema validity: 5/5 prompts pass (same as v1)
 - No increase in token count > 20% (cost regression check)
 - Structural completeness scores are equal or better

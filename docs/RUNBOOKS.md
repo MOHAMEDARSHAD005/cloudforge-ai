@@ -395,7 +395,7 @@ fields userId, jobId, sum(inputTokens) as tokens
 
 1. **If one agent is responsible:** Check that agent's `max_tokens` setting in `AGENT_DEFAULTS`. It may have been accidentally increased.
 2. **If a user's prompt is unusually long:** Check prompt length validation (should reject > 2000 chars). If validation was bypassed, investigate.
-3. **If a prompt version change caused larger outputs:** Consider reverting to previous prompt version (update `agent-defaults.ts`).
+3. **If a prompt version change caused larger outputs:** Consider reverting to previous prompt version (update `packages/shared-config/src/index.ts`).
 4. **No immediate action needed** unless cost is approaching per-user cap — in that case, enforce the daily job limit.
 5. Monitor for next 30 minutes to confirm spike is not ongoing.
 
@@ -428,7 +428,7 @@ fields failure_reason, count(*) as failures
 ### Recovery Steps
 
 1. Identify failure reason from logs
-2. **If `ValidationError`:** Check if prompt was recently changed. If so, roll back prompt version in `agent-defaults.ts`.
+2. **If `ValidationError`:** Check if prompt was recently changed. If so, roll back prompt version in `packages/shared-config/src/index.ts`.
 3. **If `RateLimitError`:** Reduce `MAX_CONCURRENT_JOBS` config temporarily, or contact LLM provider about quota increase.
 4. **If no recent changes:** May be a transient LLM provider issue — monitor for 10 minutes before taking action.
 
@@ -527,8 +527,8 @@ fields agent, error_detail, count(*) as failures
 
 | Cause | Fix |
 |---|---|
-| Prompt was changed and LLM now returns a different structure | Roll back prompt version in `agent-defaults.ts` |
-| LLM model was changed (e.g., Haiku → different Haiku version) | Roll back model version in `agent-defaults.ts` |
+| Prompt was changed and LLM now returns a different structure | Roll back prompt version in `packages/shared-config/src/index.ts` |
+| LLM model was changed (e.g., Haiku → different Haiku version) | Roll back model version in `packages/shared-config/src/index.ts` |
 | Schema was changed without prompt update | Update prompt to reflect new schema fields |
 | LLM provider returning degraded/partial responses | Check LLM provider status; wait for recovery |
 
@@ -606,7 +606,7 @@ aws ecs update-service \
 **Option B: Roll back prompt version (prompt change caused ValidationErrors):**
 
 ```typescript
-// packages/shared-config/agent-defaults.ts
+// packages/shared-config/src/index.ts
 // Change promptVersion back to previous version
 export const AGENT_DEFAULTS = {
   planner: { promptVersion: 'v1', ... },  // was 'v2' — rolling back

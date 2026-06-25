@@ -337,7 +337,7 @@ Rules:
 1. Every prompt lives in `packages/shared-prompts/<agent>/<version>.md`
 2. Prompt files are **never overwritten** — only new versions are created
 3. Each agent function accepts a `prompt_version` parameter and loads the specified file
-4. The default version is pinned in `packages/shared-config/agent-defaults.ts`
+4. The default version is pinned in `packages/shared-config/src/index.ts`
 5. Changing a prompt requires: new version file + changelog entry + prompt regression test run
 6. Old prompt versions are never deleted — they are needed to understand historical artifacts
 
@@ -355,7 +355,7 @@ packages/shared-prompts/
 ### Consequences
 - ✅ Every artifact can be traced back to the exact prompt that produced it
 - ✅ Prompt changes can be A/B tested against the golden dataset
-- ✅ Rollback is trivial — pin `agent-defaults.ts` to the previous version
+- ✅ Rollback is trivial — pin `packages/shared-config/src/index.ts` to the previous version
 - ✅ Eliminates "what prompt did we use last Tuesday?" debugging
 - ⚠️ Slightly more file overhead as prompts evolve
 - ⚠️ Requires discipline: changing a prompt *in place* is a process violation

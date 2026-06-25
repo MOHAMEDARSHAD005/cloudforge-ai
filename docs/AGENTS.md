@@ -434,7 +434,7 @@ class ReviewReport(BaseModel):
 
 ## Agent Defaults Reference
 
-Agent defaults are configured in `packages/shared-config/agent-defaults.ts`:
+Agent defaults are configured in `packages/shared-config/src/index.ts`:
 
 ```typescript
 export const AGENT_DEFAULTS = {
