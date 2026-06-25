@@ -16,8 +16,9 @@ def validate_job_id(job_id: str) -> None:
         raise ValueError(f"Invalid job ID format: {job_id}")
 
 async def send_nestjs_callback(job_id: str, event_payload: dict, trace_id: str = None) -> bool:
-    validate_job_id(job_id)
-    encoded_job_id = urllib.parse.quote(job_id)
+    if not re.match(r"^[a-zA-Z0-9_\-]+$", job_id):
+        raise ValueError("Invalid job ID format")
+    encoded_job_id = urllib.parse.quote(job_id, safe="")
     url = f"{INTERNAL_API_URL}/api/v1/jobs/{encoded_job_id}/events"
     headers = {
         "X-Internal-Token": INTERNAL_API_SECRET,

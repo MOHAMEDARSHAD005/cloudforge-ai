@@ -21,10 +21,12 @@ def validate_artifact_type(artifact_type: str) -> None:
         raise ValueError(f"Invalid artifact type: {artifact_type}")
 
 async def get_existing_artifact(job_id: str, artifact_type: str, trace_id: str = None) -> dict | None:
-    validate_job_id(job_id)
-    validate_artifact_type(artifact_type)
-    encoded_job_id = urllib.parse.quote(job_id)
-    encoded_artifact_type = urllib.parse.quote(artifact_type)
+    if not re.match(r"^[a-zA-Z0-9_\-]+$", job_id):
+        raise ValueError("Invalid job ID format")
+    if artifact_type not in {"PLAN", "ARCHITECTURE", "AWS_ARCHITECTURE", "SECURITY", "COST", "TERRAFORM", "DIAGRAM", "REVIEW"}:
+        raise ValueError("Invalid artifact type")
+    encoded_job_id = urllib.parse.quote(job_id, safe="")
+    encoded_artifact_type = urllib.parse.quote(artifact_type, safe="")
     url = f"{INTERNAL_API_URL}/api/v1/artifacts/internal/job/{encoded_job_id}/type/{encoded_artifact_type}"
     headers = {
         "X-Internal-Token": INTERNAL_API_SECRET,

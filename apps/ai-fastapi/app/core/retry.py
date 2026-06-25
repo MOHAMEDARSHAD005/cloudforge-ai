@@ -26,6 +26,7 @@ def is_retryable_exception(exception: Exception) -> bool:
             if status_code is None or status_code >= 500:
                 return True
     except ImportError:
+        # anthropic library is optional, ignore if not installed
         pass
     return False
 
@@ -161,3 +162,4 @@ async def run_agent_with_retry(agent, prompt, deps=None, agent_name="unknown", t
             agent=agent_name,
             fatal=True
         ) from e
+    raise RuntimeError("Unexpected end of run_agent_with_retry loop")
