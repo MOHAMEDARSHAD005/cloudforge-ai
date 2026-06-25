@@ -1,9 +1,11 @@
-from fastapi import FastAPI, Body
+import os
+from fastapi import FastAPI, Body, Header, HTTPException, status, Depends
 from pydantic import BaseModel
 from datetime import datetime
 import structlog
 from app.core.logger import setup_logging
 from app.core.middleware import TraceIdMiddleware
+from app.orchestrator.waves import run_pipeline
 
 setup_logging()
 logger = structlog.get_logger()
@@ -14,6 +16,15 @@ app.add_middleware(TraceIdMiddleware)
 class GenerateRequest(BaseModel):
     prompt: str
     job_id: str
+
+async def verify_internal_token(x_internal_token: str = Header(None, alias="X-Internal-Token")):
+    expected_token = os.getenv("INTERNAL_API_SECRET", "mock-internal-secret-123")
+    if not x_internal_token or x_internal_token != expected_token:
+        logger.warn("unauthorized_internal_access_attempt")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or missing internal service token"
+        )
 
 @app.on_event("startup")
 async def startup_event():
@@ -40,91 +51,29 @@ async def get_agents():
         }
     }
 
-@app.post("/generate")
-async def generate(req: GenerateRequest = Body(...)):
-    # Bind job_id to structured logs
+@app.post("/generate", dependencies=[Depends(verify_internal_token)])
+async def generate(
+    req: GenerateRequest = Body(...),
+    x_trace_id: str = Header(None, alias="X-Trace-Id")
+):
     structlog.contextvars.bind_contextvars(job_id=req.job_id)
-    logger.info("Triggering mock multi-agent generation pipeline", prompt=req.prompt)
-
-    # Return mock payloads satisfying schemas in packages/shared-types/src/schemas.ts
-    mock_plan = {
-        "schema_version": "1.0",
-        "prompt_version": "planner/v1",
-        "model_name": "claude-sonnet-4-6",
-        "provider_name": "anthropic",
-        "generated_at": datetime.utcnow().isoformat(),
-        "system_name": "Mock Architecture Plan",
-        "scale_tier": "medium",
-        "primary_use_case": "E-commerce Platform",
-        "assumed_user_count": 50000,
-        "assumed_peak_rps": 200,
-        "assumed_regions": ["us-east-1"],
-        "key_assumptions": ["Web traffic only", "Greenfield deployment"],
-        "out_of_scope": ["Data migration", "External API integrations"],
-        "execution_phases": ["Design", "Infrastructure Scaffolding", "Review"],
-        "critical_constraints": ["Monthly cost < $200"],
-        "injection_detected": False
-    }
-
-    mock_architecture = {
-        "schema_version": "1.0",
-        "prompt_version": "architecture/v1",
-        "model_name": "claude-sonnet-4-6",
-        "provider_name": "anthropic",
-        "generated_at": datetime.utcnow().isoformat(),
-        "architecture_pattern": "Modular Monolith",
-        "components": [
-            {
-                "name": "API Service",
-                "responsibility": "Handle HTTP requests",
-                "technology": "Node.js/Express",
-                "scales_horizontally": True,
-                "single_point_of_failure": False
+    logger.info("Triggering real multi-agent generation pipeline", prompt=req.prompt, trace_id=x_trace_id)
+    
+    try:
+        artifacts = await run_pipeline(req.job_id, req.prompt, trace_id=x_trace_id)
+        return {
+            "job_id": req.job_id,
+            "status": "COMPLETE",
+            "artifacts": {
+                "PLAN": artifacts["PLAN"].model_dump(mode="json"),
+                "ARCHITECTURE": artifacts["ARCHITECTURE"].model_dump(mode="json"),
+                "AWS_ARCHITECTURE": artifacts["AWS_ARCHITECTURE"].model_dump(mode="json")
             }
-        ],
-        "database_primary": "PostgreSQL",
-        "database_replica_strategy": "Single read replica",
-        "caching_layer": "Redis",
-        "message_queue": None,
-        "cdn_required": True,
-        "ha_strategy": "Multi-AZ",
-        "dr_rto_minutes": 60,
-        "dr_rpo_minutes": 15,
-        "identified_spofs": [],
-        "architecture_decisions": ["Used PostgreSQL for ACID compliance"]
-    }
-
-    mock_aws_architecture = {
-        "schema_version": "1.0",
-        "prompt_version": "aws-expert/v1",
-        "model_name": "claude-sonnet-4-6",
-        "provider_name": "anthropic",
-        "generated_at": datetime.utcnow().isoformat(),
-        "primary_region": "us-east-1",
-        "secondary_region": None,
-        "vpc_design": "3 private subnets, 3 public subnets",
-        "services": [
-            {
-                "service_name": "Amazon ECS",
-                "purpose": "Run API container",
-                "configuration": "Fargate, 0.5 vCPU, 1 GB RAM",
-                "alternatives_considered": ["AWS App Runner"],
-                "justification": "Better control over VPC routing"
-            }
-        ],
-        "networking_topology": "ALB routes to ECS tasks inside private subnets",
-        "load_balancer_type": "Application Load Balancer",
-        "auto_scaling_strategy": "Target tracking scaling at 70% CPU",
-        "backup_strategy": "AWS Backup daily snapshots",
-        "aws_well_architected_notes": ["Security group rules restricted to ALB"]
-    }
-
-    return {
-        "job_id": req.job_id,
-        "status": "COMPLETE",
-        "artifacts": {
-            "PLAN": mock_plan,
-            "ARCHITECTURE": mock_architecture,
-            "AWS_ARCHITECTURE": mock_aws_architecture
         }
-    }
+    except Exception as e:
+        logger.error("pipeline_execution_error", error=str(e), trace_id=x_trace_id)
+        # Re-raise the exception or return a structured HTTP 500 error
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Pipeline execution failed: {str(e)}"
+        )
