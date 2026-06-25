@@ -11,7 +11,7 @@ architecture_agent = Agent(
     system_prompt=load_agent_prompt("architecture", "v1")
 )
 
-async def run_architecture(plan: ProjectPlan, trace_id: str = None) -> ArchitectureModel:
+async def run_architecture(plan: ProjectPlan, trace_id: str = None):
     plan_json = plan.model_dump_json(indent=2)
     prompt = f"Here is the Project Plan:\n\n{plan_json}\n\nGenerate the Architecture Model."
     
@@ -21,4 +21,4 @@ async def run_architecture(plan: ProjectPlan, trace_id: str = None) -> Architect
         agent_name="architecture",
         trace_id=trace_id
     )
-    return result.output
+    return result.output, result.usage

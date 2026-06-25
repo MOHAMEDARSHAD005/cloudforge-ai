@@ -9,11 +9,11 @@ planner_agent = Agent(
     system_prompt=load_agent_prompt("planner", "v1")
 )
 
-async def run_planner(requirement: str, trace_id: str = None) -> ProjectPlan:
+async def run_planner(requirement: str, trace_id: str = None):
     result = await run_agent_with_retry(
         agent=planner_agent,
         prompt=requirement,
         agent_name="planner",
         trace_id=trace_id
     )
-    return result.output
+    return result.output, result.usage
