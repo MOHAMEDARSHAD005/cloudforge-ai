@@ -1,29 +1,53 @@
-node_modules/
-.next/
-dist/
-coverage/
+# ==========================
+# Node / JS
+# ==========================
+
+**/node_modules/
+**/.next/
+**/.turbo/
+**/dist/
+**/coverage/
+**/build/
+*.tsbuildinfo
+
+# ==========================
+# Python
+# ==========================
+
+**/.venv/
+**/venv/
+**/__pycache__/
+**/.pytest_cache/
+*.py[cod]
+
+# ==========================
+# Environment
+# ==========================
 
 .env
 .env.*
 !.env.example
 
-# Python
-__pycache__/
-.pytest_cache/
-.venv/
-venv/
-*.pyc
+# ==========================
+# macOS
+# ==========================
 
+.DS_Store
+Thumbs.db
+
+# ==========================
 # Logs
+# ==========================
+
 *.log
 npm-debug.log*
+pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Turborepo
-.turbo/
+# ==========================
+# IDE
+# ==========================
 
-# System files
-.DS_Store
-Thumbs.db
-*.tsbuildinfo
+.vscode/
+.idea/
