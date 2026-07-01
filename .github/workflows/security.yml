@@ -18,13 +18,13 @@ jobs:
     name: Dependency Audit
     runs-on: ubuntu-latest
     steps:
-      # Pinned: actions/checkout@v4
+      # Pinned: actions/checkout@v7
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
-      # Pinned: actions/setup-node@v4
+      # Pinned: actions/setup-node@v6
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: 'npm'
@@ -37,9 +37,9 @@ jobs:
         run: |
           npm audit --audit-level=critical
 
-      # Pinned: actions/setup-python@v5
+      # Pinned: actions/setup-python@v6
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
           cache: 'pip'
@@ -67,9 +67,9 @@ jobs:
     name: Trivy Vulnerability Scan
     runs-on: ubuntu-latest
     steps:
-      # Pinned: actions/checkout@v4
+      # Pinned: actions/checkout@v7
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # Pinned: aquasecurity/trivy-action@master
       - name: Run Trivy FS scan (HIGH Severity - Reporting only)
@@ -93,9 +93,9 @@ jobs:
           exit-code: '1'
           severity: 'CRITICAL'
 
-      # Pinned: actions/upload-artifact@v4
+      # Pinned: actions/upload-artifact@v7
       - name: Upload Trivy Reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: trivy-security-reports
@@ -108,17 +108,17 @@ jobs:
     name: CodeQL Static Analysis
     runs-on: ubuntu-latest
     steps:
-      # Pinned: actions/checkout@v4
+      # Pinned: actions/checkout@v7
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
-      # Pinned: github/codeql-action/init@v3
+      # Pinned: github/codeql-action/init@v4
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: javascript-typescript, python
           queries: security-extended,security-and-quality
 
-      # Pinned: github/codeql-action/analyze@v3
+      # Pinned: github/codeql-action/analyze@v4
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
